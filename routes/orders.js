@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUserOrders, getOrder } from '../controllers/orders.js';
+import { getUserOrders, getOrder, checkout, paymentVerification } from '../controllers/orders.js';
 import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -8,7 +8,8 @@ const router = express.Router();
 router.get('/user', verifyToken, getUserOrders);
 router.get('/:id', verifyToken, getOrder);
 
-/* UPDATE */
-
+/* CREATE */
+router.post('/checkout', verifyToken, checkout);
+router.post('/verify', paymentVerification);
 
 export default router;
