@@ -1,0 +1,101 @@
+# Cittaa Internship Backend
+
+This project is the backend component of an online store management system. It provides a RESTful API built using Node.js, Express.js, and MongoDB, enabling users to authenticate, manage products, create orders, and handle payments. The backend also integrates with the Razorpay payment gateway for secure and efficient payment processing.
+
+## Features
+
+- **User Authentication**: Users can register and log in to the system. Passwords are securely hashed and stored using bcrypt. JSON Web Tokens (JWT) are generated upon successful login for secure and stateless authentication.
+
+- **Product Management**: Products can be retrieved individually or as a list. Each product's name, description, cost, and image URL are stored in the database.
+
+- **Order Creation and Payment**: Users can create orders for products, and payments are handled using the Razorpay payment gateway.
+
+- **Payment Verification**: Payments made through the Razorpay gateway are securely verified using signatures. Upon successful payment verification, the order's payment status is updated, and users are redirected to a success page.
+
+- **User Orders**: Users can retrieve their orders, view the order details, and track the payment status.
+
+
+## Getting Started
+To use this API, follow the instructions below:
+
+- Clone the repository: `git clone https://github.com/ashishsaranshakya/cittaa-internship-backend.git`
+- Install the necessary dependencies: `npm install`
+- Start the server: `npm start dev`
+- Access the API at `http://localhost:3001/`
+
+## API Endpoints
+
+### Authentication
+
+- **Register User**
+  - Endpoint: `POST /auth/register`
+  - Description: Registers a new user.
+  - Parameters:
+    - Body: JSON object containing user registration data.
+      - `firstName`: First name of the user.
+      - `lastName`: Last name of the user.
+      - `email`: Email address of the user.
+      - `password`: Password for the user.
+      - `location`: Location of the user (optional).
+      - `occupation`: Occupation of the user (optional).
+
+- **Login User**
+  - Endpoint: `POST /auth/login`
+  - Description: Logs in a user and generates an authentication token.
+  - Parameters:
+    - Body: JSON object containing user login data.
+      - `email`: Email address of the user.
+      - `password`: Password for the user.
+
+- **Logout User**
+  - Endpoint: `POST /auth/logout`
+  - Description: Logs out a user and clears the authentication token.
+
+### Orders
+
+- **Checkout**
+  - Endpoint: `POST /order/checkout`
+  - Description: Creates an order for a product and initiates payment.
+  - Parameters:
+    - Body: JSON object containing product ID.
+      - `product_id`: ID of the product for which the order is placed.
+
+- **Payment Verification**
+  - Endpoint: `POST /order/verify`
+  - Description: Verifies the payment status, redirected from razorpay portal.
+  - Parameters:
+    - Body: JSON object containing payment verification data.
+      - `razorpay_order_id`: Razorpay order ID.
+      - `razorpay_payment_id`: Razorpay payment ID.
+      - `razorpay_signature`: Razorpay signature.
+
+- **Get Order by ID**
+  - Endpoint: `GET /order/:id`
+  - Description: Retrieves a specific order by its ID.
+  - Parameters:
+    - `id`: ID of the order to retrieve.
+
+- **Get User Orders**
+  - Endpoint: `GET /order/user`
+  - Description: Retrieves all orders associated with the authenticated user.
+
+### Products
+
+- **Get All Products**
+  - Endpoint: `GET /product`
+  - Description: Retrieves a list of all products.
+
+- **Get Product by ID**
+  - Endpoint: `GET /product/:id`
+  - Description: Retrieves a specific product by its ID.
+  - Parameters:
+    - `id`: ID of the product to retrieve.
+
+## Error Handling
+The API provides appropriate error responses in case of invalid requests or server-side issues. The error responses include appropriate status codes and error messages to assist in troubleshooting.
+
+## Acknowledgements
+- Express.js - Fast, unopinionated, minimalist web framework for Node.js.
+- Mongoose - Elegant MongoDB object modeling for Node.js.
+
+Please refer to the documentation of the used libraries and frameworks for more details on their usage and configuration.
