@@ -23,6 +23,19 @@ To use this API, follow the instructions below:
 - Start the server: `npm start dev`
 - Access the API at `http://localhost:3001/`
 
+## Configuration
+
+- Create a `.env` file in the root directory of the project.
+- Open the `.env` file and add the following lines:
+```
+MONGO_URL='<MongoDB_Url>'
+PORT=3001
+JWT_SECRET='Jwt_Secret'
+RAZORPAY_API_KEY='Razorpay_Api_Key'
+RAZORPAY_API_SECRET='Razorpay_Api_Secret'
+```
+- Save the `.env` file.
+
 ## API Endpoints
 
 ### Authentication
