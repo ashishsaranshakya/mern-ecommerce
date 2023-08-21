@@ -22,7 +22,7 @@ const UserSchema = mongoose.Schema({
     password:{
         type: String,
         required: true,
-        min: 5
+        min: 8
     },
     location: String,
     occupation: String
