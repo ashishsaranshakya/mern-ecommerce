@@ -64,34 +64,6 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
   - Endpoint: `POST /auth/logout`
   - Description: Logs out a user and clears the authentication token.
 
-### Orders
-
-- **Checkout**
-  - Endpoint: `POST /order/checkout`
-  - Description: Creates an order for a product and initiates payment.
-  - Parameters:
-    - Body: JSON object containing product ID.
-      - `product_id`: ID of the product for which the order is placed.
-
-- **Payment Verification**
-  - Endpoint: `POST /order/verify`
-  - Description: Verifies the payment status, redirected from razorpay portal.
-  - Parameters:
-    - Body: JSON object containing payment verification data.
-      - `razorpay_order_id`: Razorpay order ID.
-      - `razorpay_payment_id`: Razorpay payment ID.
-      - `razorpay_signature`: Razorpay signature.
-
-- **Get Order by ID**
-  - Endpoint: `GET /order/:id`
-  - Description: Retrieves a specific order by its ID.
-  - Parameters:
-    - `id`: ID of the order to retrieve.
-
-- **Get User Orders**
-  - Endpoint: `GET /order/user`
-  - Description: Retrieves all orders associated with the authenticated user.
-
 ### Products
 
 - **Get All Products**
@@ -103,6 +75,59 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
   - Description: Retrieves a specific product by its ID.
   - Parameters:
     - `id`: ID of the product to retrieve.
+
+- **Rate Product**
+  - Method: PATCH
+  - Endpoint: `/product/:id/rate`
+  - Description: Updates the rating of a specific product by its ID.
+  - Parameters:
+    - `id`: ID of the product to update.
+  - Request Body:
+    - `rating`: New rating value for the product.
+
+### User
+
+- **Update User Cart**
+  - Method: PATCH
+  - Endpoint: `/user/cart`
+  - Description: Updates the user's cart.
+  - Request Body:
+    - `product_id`: ID of the product to be added or deleted.
+
+### Orders
+
+- **Get User Orders**
+  - Method: GET
+  - Endpoint: `/order/user`
+  - Description: Retrieves all orders associated with the authenticated user.
+
+- **Get Order by ID**
+  - Method: GET
+  - Endpoint: `/order/:id`
+  - Description: Retrieves a specific order by its ID.
+  - Parameters:
+    - `id`: ID of the order to retrieve.
+
+- **Checkout Product**
+  - Method: POST
+  - Endpoint: `/order/checkout/product`
+  - Description: Creates an order for a product and initiates payment.
+  - Request Body:
+    - `product_id`: ID of the product for which the order is placed.
+
+- **Checkout Cart**
+  - Method: POST
+  - Endpoint: `/order/checkout/cart`
+  - Description: Creates orders for products in the user's cart and initiates payment.
+
+- **Payment Verification**
+  - Method: POST
+  - Endpoint: `/order/verify`
+  - Description: Verifies the payment status, redirected from the Razorpay portal.
+  - Request Body:
+    - `razorpay_order_id`: Razorpay order ID.
+    - `razorpay_payment_id`: Razorpay payment ID.
+    - `razorpay_signature`: Razorpay signature.
 
 ## Error Handling
 The API provides appropriate error responses in case of invalid requests or server-side issues. The error responses include appropriate status codes and error messages to assist in troubleshooting.
