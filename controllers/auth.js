@@ -45,7 +45,6 @@ export const register = async (req, res) => {
         const user=await User.findOne({email});
         if(!!user) return res.status(404).json({error: "User already exists"});
 
-        console.log({firstName,lastName,email,password,location,occupation});
         const salt= await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -57,8 +56,7 @@ export const register = async (req, res) => {
             location,
             occupation
         });
-        const savedUser = await newUser.save();
-        delete savedUser.password;
+        await newUser.save();
         res.status(201).json({message:'User created successfully'});
     }
     catch(err){

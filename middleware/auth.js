@@ -27,6 +27,33 @@ export const verifyToken = (req, res, next) => {
     }
 };
 
+export const verifyTokenForRating = (req, res, next) => {
+    try{
+        let token=req.header("Cookie");
+        
+        if(token.startsWith("token=")){
+            token=token.slice(6,token.length).trimLeft();
+        } 
+        const verified=jwt.verify(
+            token,
+            process.env.JWT_SECRET,
+            { ignoreExpiration: false }
+        );
+        
+        req.user=verified;
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        
+        if((verified.exp-currentTimestamp)/(60*60*24)<1){
+            updateToken(req, res, verified);
+        }
+        next();
+    }
+    catch(err){
+        next();
+    }
+    
+};
+
 const updateToken = (req, res, verified) => {
 
     const token=jwt.sign({
@@ -47,6 +74,6 @@ const updateToken = (req, res, verified) => {
         httpOnly:true
     };
     
-    res.status(200).cookie('token',token,options);
+    res.cookie('token',token,options);
     
 }

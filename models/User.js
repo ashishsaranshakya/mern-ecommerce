@@ -24,6 +24,10 @@ const UserSchema = mongoose.Schema({
         required: true,
         min: 8
     },
+    cart:{
+        type: Array,
+        default: []
+    },
     location: String,
     occupation: String
     },

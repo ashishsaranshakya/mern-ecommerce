@@ -6,8 +6,8 @@ const orderSchema = mongoose.Schema(
             type: String,
             required: true
         },
-        productId: {
-            type: String,
+        productIds: {
+            type: Array,
             required: true
         },
         paymentId: {
@@ -18,6 +18,10 @@ const orderSchema = mongoose.Schema(
             type: String,
             required: true,
             enum: ['Confirmed', 'Pending'],
+        },
+        totalCost: {
+            type: Number,
+            required: true
         }
     },
     { timestamps: true }

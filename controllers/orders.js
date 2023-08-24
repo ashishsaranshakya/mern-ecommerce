@@ -1,14 +1,16 @@
 import Order from '../models/Order.js';
 import Product from "../models/Product.js";
+import User from "../models/User.js";
 import { razorpayInstance } from "../index.js";
 import crypto from "crypto";
+import { Types } from 'mongoose';
+import _ from 'lodash';
 
-/* CREATE */
-export const checkout = async (req, res) => {
+export const checkoutProduct = async (req, res) => {
     const { user_id } = req.user;
     const { product_id } = req.body;
     
-    const product = await Product.findOne({ _id: product_id });
+    const product = await Product.findById(product_id);
     const options = {
       amount: Number(product.cost * 100),
       currency: "INR",
@@ -17,23 +19,74 @@ export const checkout = async (req, res) => {
     console.log(order);
     const newOrder = new Order({
         userId: user_id,
-        productId: product_id,
+        productIds: [product_id],
         paymentId: order.id,
-        paymentStatus: 'Pending'
+        paymentStatus: 'Pending',
+        totalCost: product.cost
     });
 
-    const prevOrder = await Order.findOne({ userId: user_id, productId: product_id });
+    const prevOrder = await Order.findOne({ userId: user_id, productIds: [product_id], paymentStatus: 'Pending' });
     if(!!prevOrder){
         prevOrder.paymentId = order.id;
-        prevOrder.save();
+        await prevOrder.save();
     }
     else{
-        newOrder.save();
+        await newOrder.save();
     }
   
     res.status(200).json({
       success: true,
       order
+    });
+};
+
+export const checkoutCart = async (req, res) => {
+    const { user_id } = req.user;
+    const user = await User.findById(user_id);
+    
+    const productIds = user.cart.map(productId => new Types.ObjectId(productId));
+    const products = await Product.find({ _id: { $in: productIds } });
+
+    let totalAmount = 0;
+    products.forEach(product => {
+        totalAmount += product.cost;
+    });
+    const options = {
+        amount: Number(totalAmount * 100),
+        currency: "INR",
+    };
+    
+    const order = await razorpayInstance.orders.create(options);
+    console.log(order);
+
+    const newOrder =  new Order({
+        userId: user_id,
+        productIds: user.cart,
+        paymentId: order.id,
+        paymentStatus: 'Pending',
+        totalCost: totalAmount
+    });
+
+    const prevOrders = await Order.find({ userId: user_id, paymentStatus: 'Pending' });
+    let prevOrder = null;
+    prevOrders.forEach(order => {
+        if(!prevOrder && _.isEmpty(_.xor(order.productIds, user.cart))){
+            prevOrder = order;
+        }
+    });
+    if(!!prevOrder){
+        prevOrder.paymentId = order.id;
+        await prevOrder.save();
+    }
+    else{
+        await newOrder.save();
+    }
+    user.cart = [];
+    await user.save();
+
+    res.status(200).json({
+        success: true,
+        order
     });
 };
 
@@ -53,7 +106,7 @@ export const paymentVerification = async (req, res) => {
         const order = await Order.findOne({ paymentId: razorpay_order_id });
 
         order.paymentStatus = "Confirmed";
-        order.save();
+        await order.save();
 
         res.redirect(
         `http://localhost:3000/paymentsuccess?reference=${razorpay_payment_id}`
@@ -65,10 +118,12 @@ export const paymentVerification = async (req, res) => {
     }
 };
 
-/* READ */
 export const getOrder = async (req, res) => {
     try{
-        const order = await Order.findOne({_id: req.params.id});
+        const order = await Order.findById(req.params.id);
+        if(order.userId !== req.user.user_id){
+            throw new Error("Unauthorized");
+        }
         res.status(200).json(order);
     }
     catch(error){
@@ -85,5 +140,3 @@ export const getUserOrders = async (req, res) => {
         res.status(404).json({error: error.message});
     }
 }
-
-/* UPDATE */
