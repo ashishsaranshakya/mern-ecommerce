@@ -1,9 +1,10 @@
 import express from 'express';
-import {patchCart} from '../controllers/users.js';
+import {addToCart, deleteFromCart} from '../controllers/users.js';
 import {verifyToken} from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.patch('/cart', verifyToken, patchCart);
+router.post('/cart', verifyToken, addToCart);
+router.delete('/cart', verifyToken, deleteFromCart);
 
 export default router;
