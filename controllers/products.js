@@ -1,4 +1,5 @@
 import Product from '../models/Product.js';
+import Order from '../models/Order.js';
 
 export const getAllProducts = async (req, res) => {
     try {
@@ -112,8 +113,20 @@ export const rateProduct = async (req, res) => {
     try {
         const { rating } = req.body;
         const userId = req.user.user_id;
+        const productId = req.params.id;
         
-        const product = await Product.findById(req.params.id);
+        const orders = await Order.find({userId: userId});
+        let hasUserOrdered = false;
+        orders.forEach(order => {
+            if (order.productIds.includes(productId)) {
+                hasUserOrdered = true;
+            }
+        });
+        if(!hasUserOrdered) {
+            throw new Error("User has not ordered this product yet.");
+        }
+
+        const product = await Product.findById(productId);
         const existingRatingIndex = product.ratings.findIndex((rating) => rating.userId === userId);
         
         if (existingRatingIndex !== -1) {
