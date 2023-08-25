@@ -70,6 +70,13 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
   - Endpoint: `GET /product`
   - Description: Retrieves a list of all products.
 
+- **Get Products by Search**
+  - Method: GET
+  - Endpoint: `/product/search`
+  - Description: Retrieves products matching the search term.
+  - Request Body:
+    - `searchTerm`: Search term to filter products.
+
 - **Get Product by ID**
   - Endpoint: `GET /product/:id`
   - Description: Retrieves a specific product by its ID.
@@ -85,14 +92,22 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
   - Request Body:
     - `rating`: New rating value for the product.
 
-### User
+### User Cart
 
-- **Update User Cart**
-  - Method: PATCH
+- **Add to Cart**
+  - Method: POST
   - Endpoint: `/user/cart`
-  - Description: Updates the user's cart.
+  - Description: Adds a product to the user's cart.
   - Request Body:
-    - `product_id`: ID of the product to be added or deleted.
+    - `productId`: ID of the product to add.
+
+- **Delete from Cart**
+  - Method: DELETE
+  - Endpoint: `/user/cart`
+  - Description: Deletes a product from the user's cart.
+  - Request Body:
+    - `productId`: ID of the product to delete.
+    - `single`: Boolean flag indicating whether to delete a single item.
 
 ### Orders
 
@@ -118,7 +133,7 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
 - **Checkout Cart**
   - Method: POST
   - Endpoint: `/order/checkout/cart`
-  - Description: Creates orders for products in the user's cart and initiates payment.
+  - Description: Creates order for products in the user's cart and initiates payment.
 
 - **Payment Verification**
   - Method: POST
