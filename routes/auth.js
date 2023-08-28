@@ -1,9 +1,10 @@
 import express from 'express';
-import {login, validateRegister, register, logout} from '../controllers/auth.js';
+import { login, register, logout } from '../controllers/auth.js';
+import { validateRegisterData } from '../middleware/registerValidation.js';
 
 const router = express.Router();
 
-router.post('/register', validateRegister, register);
+router.post('/register', validateRegisterData, register);
 router.post('/login', login);
 router.post('/logout', logout);
 

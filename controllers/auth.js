@@ -1,36 +1,9 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { body, validationResult } from 'express-validator';
+import { validationResult } from 'express-validator';
 import User from '../models/User.js';
 
 /* REGISTER */
-export const validateRegister = [
-    body("firstName", 'First name should be between 2 and 20 characters long.').isLength({
-        min:2,
-        max:20
-    }),
-    body("lastName", 'Last name should be between 2 and 20 characters long.').isLength({
-        min:2,
-        max:20
-    }),
-    body("email", 'Email is invalid.').isEmail(),
-    body("password", 'Password should be at least 8 characters long.')
-        .isLength({
-            min:8
-        })
-        .custom((value, { req }) => {
-            const passwordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).*$/;
-            return passwordPattern.test(value);
-        })
-        .withMessage('Password must contain atleast one uppercase letter, one number and one special character'),
-    body("location", 'Location should be less than 20 characters long.').isLength({
-        max:20
-    }),
-    body("occupation", 'Occupation should be less than 20 characters long.').isLength({
-        max:20
-    })
-];
-
 export const register = async (req, res) => {
     try{
         const {firstName,lastName,email,password,location,occupation} = req.body;
