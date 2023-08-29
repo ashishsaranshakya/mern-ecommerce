@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
 import User from '../models/User.js';
+import logger from '../logger.js';
 
 /* REGISTER */
 export const register = async (req, res) => {
@@ -10,13 +11,15 @@ export const register = async (req, res) => {
 
         const errors=validationResult(req);
         if(!errors.isEmpty()){
-            return res.status(400).json({
-                errors:errors.array()
-            })
+            logger.error(`Error while registering user: ${errors.array()}`);
+            return res.status(400).json({errors: errors.array()});
         }
 
         const user=await User.findOne({email});
-        if(!!user) return res.status(404).json({error: "User already exists"});
+        if(!!user){
+            logger.error(`User already exists for email ${email}`);
+            return res.status(400).json({error: 'User already exists'});
+        }
 
         const salt= await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -30,9 +33,11 @@ export const register = async (req, res) => {
             occupation
         });
         await newUser.save();
+        logger.info(`User ${email} registered successfully`);
         res.status(201).json({message:'User created successfully'});
     }
     catch(err){
+        logger.error(`Error while registering user: ${err.message}`);
         res.status(500).json({error: err.message});
     }
 }
@@ -43,10 +48,16 @@ export const login = async (req, res) => {
         const {email,password} = req.body;
         
         const user=await User.findOne({email});
-        if(!user) return res.status(404).json({error: "User not found"});
+        if(!user) {
+            logger.error(`User not found for email ${email}`);
+            return res.status(400).json({error: "User not found"});
+        }
         
         const isMatch = await bcrypt.compare(password, user.password);
-        if(!isMatch) return res.status(400).json({error: "Invalid credentials"});
+        if(!isMatch){
+            logger.error(`Invalid credentials for user ${email}`);
+            return res.status(400).json({error: "Invalid credentials"});
+        }
 
         const token=jwt.sign({
             user_id:user.id,email
@@ -65,9 +76,11 @@ export const login = async (req, res) => {
             httpOnly:true
         };
         
+        logger.info(`User ${email} logged in successfully`);
         res.status(200).cookie('token',token,options).send();
     }
     catch(err){
+        logger.error(`Error while logging in user: ${err.message}`);
         res.status(500).json({error: err.message});
     }
 }
@@ -75,9 +88,11 @@ export const login = async (req, res) => {
 /* LOGOUT */
 export const logout = async (req, res) => {
     try{
+        logger.info(`User ${req.user.email} logged out successfully`);
         res.status(200).clearCookie('token').send();
     }
     catch(err){
+        logger.error(`Error while logging out user: ${err.message}`);
         res.status(500).json({error: err.message});
     }
 }

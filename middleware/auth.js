@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import logger from '../logger.js'
 
 export const verifyToken = (req, res, next) => {
     try{
@@ -20,10 +21,12 @@ export const verifyToken = (req, res, next) => {
             updateToken(req, res, verified);
         }
 
+        logger.info(`User ${verified.user_id} authenticated`);
         next();
     }
     catch(err){
-        res.status(500).json({error: err.message});
+        logger.error(err.message);
+        res.status(501).json({error: err.message});
     }
 };
 
@@ -74,6 +77,6 @@ const updateToken = (req, res, verified) => {
         httpOnly:true
     };
     
+    logger.info(`Token updated for user ${verified.user_id}`);
     res.cookie('token',token,options);
-    
 }

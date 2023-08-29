@@ -1,5 +1,6 @@
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
+import logger from '../logger.js';
 
 export const getAllProducts = async (req, res) => {
     try {
@@ -29,8 +30,11 @@ export const getAllProducts = async (req, res) => {
             };
         });
 
+        logger.info(`All products fetched successfully`);
         res.status(200).json(simplifiedProducts);
-    } catch (error) {
+    }
+    catch (error) {
+        logger.error(`Error while getting all products: ${error.message}`);
         res.status(404).json({ error: error.message });
     }
 };
@@ -61,8 +65,11 @@ export const getProduct = async (req, res) => {
             userRating: userRating
         };
         
+        logger.info(`Product ${req.params.id} fetched successfully`);
         res.status(200).json(simplifiedProduct);
-    } catch (error) {
+    }
+    catch (error) {
+        logger.error(`Error while getting product ${req.params.id}: ${error.message}`);
         res.status(404).json({ error: error.message });
     }
 };
@@ -103,8 +110,11 @@ export const searchProducts = async (req, res) => {
             };
         });
 
+        logger.info(`Products searched successfully for "${searchTerm}"`);
         res.status(200).json(simplifiedProducts);
-    } catch (error) {
+    }
+    catch (error) {
+        logger.error(`Error while searching products: ${error.message}`);
         res.status(404).json({error: error.message});
     }
 }
@@ -139,8 +149,11 @@ export const rateProduct = async (req, res) => {
         product.rating = totalRatings / product.ratings.length;
         
         await product.save();
+        logger.info(`Product ${req.params.id} rated successfully by user ${userId}`);
         res.status(200).json({message: "Rating updated successfully"});
-    } catch (error) {
+    }
+    catch (error) {
+        logger.error(`Error while rating product ${req.params.id}: ${error.message}`);
         res.status(404).json({ error: error.message });
     }
 }
