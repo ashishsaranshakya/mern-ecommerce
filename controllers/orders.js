@@ -128,10 +128,9 @@ export const paymentVerification = async (req, res) => {
             .digest("hex");
 
         const isAuthentic = expectedSignature === razorpay_signature;
+        const order = await Order.findOne({ paymentId: razorpay_order_id });
 
         if (isAuthentic) {
-            const order = await Order.findOne({ paymentId: razorpay_order_id });
-
             order.paymentStatus = "Confirmed";
             await order.save();
 
@@ -171,9 +170,18 @@ export const getOrder = async (req, res) => {
 
 export const getUserOrders = async (req, res) => {
     try{
-        const orders = await Order.find({userId: req.user.user_id});
+        const { page = 1, limit = 10, sort = "desc" } = req.query;
+
+        const orders = await Order.paginate(
+            {userId: req.user.user_id},
+            {
+                page: page,
+                limit: limit,
+                sort: { updatedAt: sort === 'asc' ? 1 : -1 }
+            });
+        
         logger.info(`Orders fetched for user ${req.user.user_id}`);
-        res.status(200).json(orders);
+        res.status(200).json(orders.docs);
     }
     catch(error){
         logger.error(`Error while fetching orders: ${error.message}`);

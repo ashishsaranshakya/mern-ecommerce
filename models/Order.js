@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+import paginate from 'mongoose-paginate-v2';
 
-const orderSchema = mongoose.Schema(
+const OrderSchema = mongoose.Schema(
     {
         userId: {
             type: String,
@@ -27,6 +28,8 @@ const orderSchema = mongoose.Schema(
     { timestamps: true }
 );
 
-const Order = mongoose.model('Order', orderSchema);
+OrderSchema.plugin(paginate);
+
+const Order = mongoose.model('Order', OrderSchema);
 
 export default Order;
