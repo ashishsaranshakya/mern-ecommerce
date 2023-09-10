@@ -38,6 +38,7 @@ mongoose.connect(process.env.MONGO_URL,
     .then(() => app.listen(PORT, () => console.log(`Server running on port: ${PORT}`)))
     .catch((error) => console.log(error.message));
 
+/* RAZORPAY SETUP */
 export const razorpayInstance = new Razorpay({
         key_id: process.env.RAZORPAY_API_KEY,
         key_secret: process.env.RAZORPAY_API_SECRET,

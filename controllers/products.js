@@ -7,9 +7,10 @@ export const getAllProducts = async (req, res) => {
         if(req.user){
             userId = req.user.user_id;
         }
-        const products = await Product.find();
+        const { page = 1, limit = 10 } = req.query;
+        const products = await Product.paginate({}, { page, limit });
 
-        const simplifiedProducts = products.map(product => {
+        const simplifiedProducts = products.docs.map(product => {
             let userRating = null;
             if (userId) {
                 const userRatingObj = product.ratings.find(rating => rating.userId === userId);
@@ -75,15 +76,18 @@ export const searchProducts = async (req, res) => {
             userId = req.user.user_id;
         }
 
-        const products = await Product.find(
+        const { page = 1, limit = 10 } = req.query;
+        const products = await Product.paginate(
             { name: 
                 { 
                     $regex: searchTerm, 
                     $options: 'i' 
                 } 
-            });
+            },
+            { page, limit }
+        );
         
-        const simplifiedProducts = products.map(product => {
+        const simplifiedProducts = products.docs.map(product => {
             let userRating = null;
             if (userId) {
                 const userRatingObj = product.ratings.find(rating => rating.userId.toString() === userId);
