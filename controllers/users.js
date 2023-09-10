@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import logger from '../logger.js';
 
 export const addToCart = async (req, res) => {
     const { productId } = req.body;
@@ -21,11 +22,12 @@ export const addToCart = async (req, res) => {
         );
 
         const updatedUser = await User.findById(userId);
+        logger.info(`Product ${productId} added to cart of user ${userId}`);
         res.status(200).json(updatedUser.cart);
         
     }
     catch (error) {
-        console.error(error);
+        logger.error(`Error while adding product ${productId} to cart of user ${userId}: ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 };
@@ -52,11 +54,15 @@ export const deleteFromCart = async (req, res) => {
             );
 
             const updatedUser = await User.findById(userId);
+            logger.info(`Product ${productId} deleted from cart of user ${userId}`);
             res.status(200).json(updatedUser.cart);
         } else {
-            res.status(404).json({ error: "Product not found in cart" });
+            logger.error(`Product ${productId} not found in cart of user ${userId}`);
+            res.status(400).json({ error: "Product not found in cart" });
         }
-    } catch (error) {
+    }
+    catch (error) {
+        logger.error(`Error while deleting product ${productId} from cart of user ${userId}: ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 };

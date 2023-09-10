@@ -5,116 +5,151 @@ import { razorpayInstance } from "../index.js";
 import crypto from "crypto";
 import { Types } from 'mongoose';
 import _ from 'lodash';
+import logger from '../logger.js';
 
 export const checkoutProduct = async (req, res) => {
-    const { user_id } = req.user;
-    const { product_id } = req.body;
+    try{
+        const { user_id } = req.user;
+        const { product_id } = req.body;
+        let quantity = 1;
+        if(req.body.quantity){
+            quantity = req.body.quantity;
+        }
+        
+        const product = await Product.findById(product_id);
+        const options = {
+            amount: Number(product.cost * quantity * 100),
+            currency: "INR",
+        };
+        const order = await razorpayInstance.orders.create(options);
     
-    const product = await Product.findById(product_id);
-    const options = {
-      amount: Number(product.cost * 100),
-      currency: "INR",
-    };
-    const order = await razorpayInstance.orders.create(options);
-    console.log(order);
-    const newOrder = new Order({
-        userId: user_id,
-        productIds: [product_id],
-        paymentId: order.id,
-        paymentStatus: 'Pending',
-        totalCost: product.cost
-    });
+        const newOrder = new Order({
+            userId: user_id,
+            products: [{productId: product_id, quantity}],
+            paymentId: order.id,
+            paymentStatus: 'Pending',
+            totalCost: product.cost * quantity
+        });
 
-    const prevOrder = await Order.findOne({ userId: user_id, productIds: [product_id], paymentStatus: 'Pending' });
-    if(!!prevOrder){
-        prevOrder.paymentId = order.id;
-        await prevOrder.save();
+        const prevOrder = await Order.findOne({ 
+            userId: user_id, 
+            products: [{productId: product_id, quantity}], 
+            paymentStatus: 'Pending' 
+        });
+        if(!!prevOrder){
+            prevOrder.paymentId = order.id;
+            await prevOrder.save();
+        }
+        else{
+            await newOrder.save();
+        }
+        
+        logger.info(`Order created for user ${user_id} for product ${product_id}`);
+        res.status(200).json({
+            success: true,
+            order
+        });
     }
-    else{
-        await newOrder.save();
+    catch(error){
+        logger.error(`Error while creating order: ${error.message}`);
+        res.status(500).json({error: error.message});
     }
-  
-    res.status(200).json({
-      success: true,
-      order
-    });
 };
 
 export const checkoutCart = async (req, res) => {
-    const { user_id } = req.user;
-    const user = await User.findById(user_id);
-    
-    const productIds = user.cart.map(productId => new Types.ObjectId(productId));
-    const products = await Product.find({ _id: { $in: productIds } });
+    try{
+        const { user_id } = req.user;
+        const user = await User.findById(user_id);
 
-    let totalAmount = 0;
-    products.forEach(product => {
-        totalAmount += product.cost;
-    });
-    const options = {
-        amount: Number(totalAmount * 100),
-        currency: "INR",
-    };
-    
-    const order = await razorpayInstance.orders.create(options);
-    console.log(order);
-
-    const newOrder =  new Order({
-        userId: user_id,
-        productIds: user.cart,
-        paymentId: order.id,
-        paymentStatus: 'Pending',
-        totalCost: totalAmount
-    });
-
-    const prevOrders = await Order.find({ userId: user_id, paymentStatus: 'Pending' });
-    let prevOrder = null;
-    prevOrders.forEach(order => {
-        if(!prevOrder && _.isEmpty(_.xor(order.productIds, user.cart))){
-            prevOrder = order;
+        if(user.cart.length === 0){
+            logger.error(`User ${user_id} has no products in cart`);
+            return res.status(400).json({error: "Cart is empty"});
         }
-    });
-    if(!!prevOrder){
-        prevOrder.paymentId = order.id;
-        await prevOrder.save();
-    }
-    else{
-        await newOrder.save();
-    }
-    user.cart = [];
-    await user.save();
+        
+        const productIds = user.cart.map(product => new Types.ObjectId(product.productId));
+        const products = await Product.find({ _id: { $in: productIds } });
 
-    res.status(200).json({
-        success: true,
-        order
-    });
+        let totalAmount = 0;
+        products.forEach(product => {
+            totalAmount += product.cost;
+        });
+        const options = {
+            amount: Number(totalAmount * 100),
+            currency: "INR",
+        };
+        const order = await razorpayInstance.orders.create(options);
+
+        const newOrder =  new Order({
+            userId: user_id,
+            products: user.cart,
+            paymentId: order.id,
+            paymentStatus: 'Pending',
+            totalCost: totalAmount
+        });
+        
+        const prevOrders = await Order.find({ userId: user_id, paymentStatus: 'Pending' });
+        let prevOrder = null;
+        prevOrders.forEach(order => {
+            if(!prevOrder && order.products.length===user.cart.length && _.isEmpty(_.xorWith(order.products, user.cart, _.isEqual))){
+                prevOrder = order;
+            }
+        });
+        if(!!prevOrder){
+            prevOrder.paymentId = order.id;
+            await prevOrder.save();
+        }
+        else{
+            await newOrder.save();
+        }
+        user.cart = [];
+        await user.save();
+
+        logger.info(`Order created for user ${user_id} for products ${newOrder.products}`);
+        res.status(200).json({
+            success: true,
+            order
+        });
+    }
+    catch(error){
+        logger.error(`Error while creating order: ${error.message}`);
+        res.status(500).json({error: error.message});
+    }
 };
 
 export const paymentVerification = async (req, res) => {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    try{
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const expectedSignature = crypto
-        .createHmac("sha256", process.env.RAZORPAY_API_SECRET)
-        .update(body.toString())
-        .digest("hex");
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_API_SECRET)
+            .update(body.toString())
+            .digest("hex");
 
-    const isAuthentic = expectedSignature === razorpay_signature;
+        const isAuthentic = expectedSignature === razorpay_signature;
 
-    if (isAuthentic) {
-        const order = await Order.findOne({ paymentId: razorpay_order_id });
+        if (isAuthentic) {
+            const order = await Order.findOne({ paymentId: razorpay_order_id });
 
-        order.paymentStatus = "Confirmed";
-        await order.save();
+            order.paymentStatus = "Confirmed";
+            await order.save();
 
-        res.redirect(
-        `http://localhost:3000/paymentsuccess?reference=${razorpay_payment_id}`
-        );
-    } else {
-        res.status(400).json({
-        success: false,
-        });
+            logger.info(`Payment verified for order ${order._id}`);
+            res.redirect(
+                `http://localhost:3000/paymentsuccess?reference=${order._id}`
+            );
+        }
+        else {
+            logger.error(`Payment verification failed for order ${order._id}`);
+            res.redirect(
+                `http://localhost:3000/paymentfailure?reference=${order._id}`
+            );
+        }
+    }
+    catch(error){
+        logger.error(`Error while verifying payment: ${error.message}`);
+        res.status(500).json({error: error.message});
     }
 };
 
@@ -122,11 +157,14 @@ export const getOrder = async (req, res) => {
     try{
         const order = await Order.findById(req.params.id);
         if(order.userId !== req.user.user_id){
-            throw new Error("Unauthorized");
+            logger.error(`User ${req.user.user_id} not authorized to view order ${req.params.id}`);
+            return res.status(403).json({error: "User not authorized to view this order"});
         }
+        logger.info(`Order ${req.params.id} fetched for user ${req.user.user_id}`);
         res.status(200).json(order);
     }
     catch(error){
+        logger.error(`Error while fetching order ${req.params.id}: ${error.message}`);
         res.status(404).json({error: error.message});
     }
 }
@@ -134,9 +172,11 @@ export const getOrder = async (req, res) => {
 export const getUserOrders = async (req, res) => {
     try{
         const orders = await Order.find({userId: req.user.user_id});
+        logger.info(`Orders fetched for user ${req.user.user_id}`);
         res.status(200).json(orders);
     }
     catch(error){
+        logger.error(`Error while fetching orders: ${error.message}`);
         res.status(404).json({error: error.message});
     }
 }
