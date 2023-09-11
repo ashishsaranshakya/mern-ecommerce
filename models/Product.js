@@ -6,7 +6,8 @@ const ProductSchema = mongoose.Schema({
         type: String,
         required: true,
         min: 4,
-        max: 50
+        max: 50,
+        index: true
     },
     description: {
         type: String,
@@ -23,7 +24,7 @@ const ProductSchema = mongoose.Schema({
         required: true
     },
     ratings: {
-        type:Array,
+        type: Array,
         default: []
     },
     rating: {

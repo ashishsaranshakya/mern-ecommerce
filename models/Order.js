@@ -5,7 +5,8 @@ const OrderSchema = mongoose.Schema(
     {
         userId: {
             type: String,
-            required: true
+            required: true,
+            index: true
         },
         products: {
             type: Array,
@@ -13,12 +14,13 @@ const OrderSchema = mongoose.Schema(
         },
         paymentId: {
             type: String,
-            required: true
+            required: true,
+            unique: true
         },
         paymentStatus: {
             type: String,
             required: true,
-            enum: ['Confirmed', 'Pending'],
+            enum: ['Confirmed', 'Pending']
         },
         totalCost: {
             type: Number,
