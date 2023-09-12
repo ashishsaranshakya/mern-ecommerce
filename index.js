@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import Razorpay from "razorpay";
+import https from 'https';
+import fs from 'fs';
 
 import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
@@ -17,7 +19,7 @@ app.use(bodyParser.json({limit: '30mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '30mb', extended: true}));
 
 const corsOptions = {
-    origin: "http://localhost:3000",
+    origin: "*",
     credentials: true
 };
 app.use(cors(corsOptions));
@@ -28,6 +30,12 @@ app.use('/product', productRoutes);
 app.use('/order', orderRoutes);
 app.use('/user', userRoutes);
 
+/* HTTPS SETUP */
+const privateKey = fs.readFileSync('./certs/key.pem', 'utf8');
+const certificate = fs.readFileSync('./certs/cert.pem', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
+const httpsServer = https.createServer(credentials, app);
+
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 6001;
 mongoose.connect(process.env.MONGO_URL, 
@@ -35,7 +43,7 @@ mongoose.connect(process.env.MONGO_URL,
         useNewUrlParser: true, 
         useUnifiedTopology: true
     })
-    .then(() => app.listen(PORT, () => console.log(`Server running on port: ${PORT}`)))
+    .then(() => httpsServer.listen(PORT, () => console.log(`Server running on port: ${PORT}`)))
     .catch((error) => console.log(error.message));
 
 /* RAZORPAY SETUP */
