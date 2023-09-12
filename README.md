@@ -43,22 +43,20 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
 - **Register User**
   - Endpoint: `POST /auth/register`
   - Description: Registers a new user.
-  - Parameters:
-    - Body: JSON object containing user registration data.
-      - `firstName`: First name of the user.
-      - `lastName`: Last name of the user.
-      - `email`: Email address of the user.
-      - `password`: Password for the user.
-      - `location`: Location of the user (optional).
-      - `occupation`: Occupation of the user (optional).
+  - Body: JSON object containing user registration data.
+    - `firstName`: First name of the user.
+    - `lastName`: Last name of the user.
+    - `email`: Email address of the user.
+    - `password`: Password for the user.
+    - `location`: Location of the user (optional).
+    - `occupation`: Occupation of the user (optional).
 
 - **Login User**
   - Endpoint: `POST /auth/login`
   - Description: Logs in a user and generates an authentication token.
-  - Parameters:
-    - Body: JSON object containing user login data.
-      - `email`: Email address of the user.
-      - `password`: Password for the user.
+  - Body: JSON object containing user login data.
+    - `email`: Email address of the user.
+    - `password`: Password for the user.
 
 - **Logout User**
   - Endpoint: `POST /auth/logout`
@@ -66,16 +64,15 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
 
 ### Products
 
-- **Get All Products**
-  - Endpoint: `GET /product`
-  - Description: Retrieves a list of all products.
-
-- **Get Products by Search**
+- **Get Products**
   - Method: GET
-  - Endpoint: `/product/search`
-  - Description: Retrieves products matching the search term.
-  - Request Body:
-    - `searchTerm`: Search term to filter products.
+  - Endpoint: `/product`
+  - Description: Retrieves a list of products filtered by various criteria.
+  - Query Parameters:
+    - `page` (Optional): Specifies the page number for pagination (default is 1).
+    - `limit` (Optional): Sets the maximum number of products per page (default is 10).
+    - `query` (Optional): Filters products based on a search term (default is null).
+    - `sort` (Optional): Specifies the sorting order for products, either 'asc' (ascending) or 'desc' (descending) based on the cost (default is 'desc').
 
 - **Get Product by ID**
   - Endpoint: `GET /product/:id`
@@ -92,22 +89,22 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
   - Request Body:
     - `rating`: New rating value for the product.
 
-### User Cart
+### User
 
 - **Add to Cart**
   - Method: POST
   - Endpoint: `/user/cart`
   - Description: Adds a product to the user's cart.
-  - Request Body:
-    - `productId`: ID of the product to add.
+  - Query Parameters:
+    - `id`: ID of the product to add.
 
 - **Delete from Cart**
   - Method: DELETE
   - Endpoint: `/user/cart`
   - Description: Deletes a product from the user's cart.
-  - Request Body:
-    - `productId`: ID of the product to delete.
-    - `single`: Boolean flag indicating whether to delete a single item.
+  - Query Parameters:
+    - `id`: ID of the product to delete.
+    - `single`: Flag indicating whether to delete a single item.
 
 ### Orders
 
@@ -115,6 +112,10 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
   - Method: GET
   - Endpoint: `/order/user`
   - Description: Retrieves all orders associated with the authenticated user.
+  - Query Parameters:
+    - `page` (Optional): Specifies the page number for pagination (default is 1).
+    - `limit` (Optional): Sets the maximum number of products per page (default is 10).
+    - `sort` (Optional): Specifies the sorting order for products, either 'asc' (ascending) or 'desc' (descending) based on the cost (default is 'desc').
 
 - **Get Order by ID**
   - Method: GET
@@ -127,8 +128,9 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
   - Method: POST
   - Endpoint: `/order/checkout/product`
   - Description: Creates an order for a product and initiates payment.
-  - Request Body:
-    - `product_id`: ID of the product for which the order is placed.
+  - Query Parameters:
+    - `id`: ID of the product for which the order is placed.
+    - `quantity`: Quantity of product to order. 
 
 - **Checkout Cart**
   - Method: POST
