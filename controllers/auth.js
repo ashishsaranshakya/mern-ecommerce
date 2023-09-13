@@ -4,6 +4,19 @@ import { validationResult } from 'express-validator';
 import User from '../models/User.js';
 import logger from '../logger.js';
 
+/* CREATE TOKEN */
+export const createToken = (_id) =>{
+    return jwt.sign(
+        {
+            user_id:_id
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn:"7d",
+        }
+    )
+}
+
 /* REGISTER */
 export const register = async (req, res) => {
     try{
@@ -59,14 +72,7 @@ export const login = async (req, res) => {
             return res.status(400).json({error: "Invalid credentials"});
         }
 
-        const token=jwt.sign({
-            user_id:user.id,email
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn:"7d",
-            }
-        )
+        const token = createToken(user.id);
 
         user.token=token
         user.password=undefined

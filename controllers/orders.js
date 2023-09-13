@@ -10,13 +10,11 @@ import logger from '../logger.js';
 export const checkoutProduct = async (req, res) => {
     try{
         const { user_id } = req.user;
-        const { product_id } = req.body;
-        let quantity = 1;
-        if(req.body.quantity){
-            quantity = req.body.quantity;
-        }
+        const { id: product_id, quantity = 1 } = req.query;
         
         const product = await Product.findById(product_id);
+        if(!product) return res.status(400).json({ error: "Product not found" });
+
         const options = {
             amount: Number(product.cost * quantity * 100),
             currency: "INR",
@@ -173,10 +171,10 @@ export const getUserOrders = async (req, res) => {
         const { page = 1, limit = 10, sort = "desc" } = req.query;
 
         const orders = await Order.paginate(
-            {userId: req.user.user_id},
+            { userId: req.user.user_id },
             {
-                page: page,
-                limit: limit,
+                page,
+                limit,
                 sort: { updatedAt: sort === 'asc' ? 1 : -1 }
             });
         

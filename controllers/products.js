@@ -2,14 +2,26 @@ import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import logger from '../logger.js';
 
-export const getAllProducts = async (req, res) => {
+export const getProducts = async (req, res) => {
     try {
         let userId = null;
         if(req.user){
             userId = req.user.user_id;
         }
-        const { page = 1, limit = 10 } = req.query;
-        const products = await Product.paginate({}, { page, limit });
+        const { page = 1, limit = 10, query: searchTerm = null, sort = "desc" } = req.query;
+        
+        let query = {};
+        if(searchTerm){
+            query = { name: { $regex: searchTerm, $options: 'i' } };
+        }
+        const products = await Product.paginate(
+            query,
+            { 
+                page,
+                limit,
+                sort: { cost: sort === 'asc' ? 1 : -1 }
+            }
+        );
 
         const simplifiedProducts = products.docs.map(product => {
             let userRating = null;
@@ -31,12 +43,14 @@ export const getAllProducts = async (req, res) => {
             };
         });
 
-        logger.info(`All products fetched successfully`);
+        if(searchTerm) logger.info(`Products searched successfully for: ${searchTerm}`);
+        else logger.info(`All products fetched successfully`);
+
         res.status(200).json(simplifiedProducts);
     }
     catch (error) {
         logger.error(`Error while getting all products: ${error.message}`);
-        res.status(404).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -74,54 +88,6 @@ export const getProduct = async (req, res) => {
         res.status(404).json({ error: error.message });
     }
 };
-
-export const searchProducts = async (req, res) => {
-    try {
-        const {searchTerm} = req.body;
-        let userId = null;
-        if(req.user){
-            userId = req.user.user_id;
-        }
-
-        const { page = 1, limit = 10 } = req.query;
-        const products = await Product.paginate(
-            { name: 
-                { 
-                    $regex: searchTerm, 
-                    $options: 'i' 
-                } 
-            },
-            { page, limit }
-        );
-        
-        const simplifiedProducts = products.docs.map(product => {
-            let userRating = null;
-            if (userId) {
-                const userRatingObj = product.ratings.find(rating => rating.userId.toString() === userId);
-                if (userRatingObj) {
-                    userRating = userRatingObj.value;
-                }
-            }
-
-            return {
-                _id: product._id,
-                name: product.name,
-                description: product.description,
-                cost: product.cost,
-                imageUrl: product.imageUrl,
-                rating: product.rating,
-                userRating: userRating
-            };
-        });
-
-        logger.info(`Products searched successfully for "${searchTerm}"`);
-        res.status(200).json(simplifiedProducts);
-    }
-    catch (error) {
-        logger.error(`Error while searching products: ${error.message}`);
-        res.status(404).json({error: error.message});
-    }
-}
 
 export const rateProduct = async (req, res) => {
     try {

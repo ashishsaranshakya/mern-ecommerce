@@ -1,14 +1,14 @@
 import jwt from 'jsonwebtoken';
-import logger from '../logger.js'
+import logger from '../logger.js';
+import { createToken } from '../controllers/auth.js';
+
 
 export const verifyToken = (req, res, next) => {
     try{
         let token=req.header("Cookie");
-        if(!token) return res.status(401).json({error: "Unauthorized"});
-        
-        if(token.startsWith("token=")){
-            token=token.slice(6,token.length).trimLeft();
-        } 
+        if(!token || !token.startsWith("token=")) return res.status(401).json({error: "Unauthorized"});
+
+        token=token.slice(6,token.length).trimLeft();
         const verified=jwt.verify(
             token,
             process.env.JWT_SECRET,
@@ -58,23 +58,16 @@ export const verifyTokenForRating = (req, res, next) => {
 };
 
 const updateToken = (req, res, verified) => {
-
-    const token=jwt.sign({
-        user_id: verified.user_id,
-        email: verified.email
-        },
-        process.env.JWT_SECRET,
-        {
-            expiresIn:"7d",
-        }
-    )
+    const token = createToken(verified.user_id);
 
     verified.token=token
     verified.password=undefined
 
     const options={
         expires:new Date(Date.now()+(7*24*3600*1000)),
-        httpOnly:true
+        httpOnly:true,
+        sameSite: 'strict',
+        secure: true,
     };
     
     logger.info(`Token updated for user ${verified.user_id}`);

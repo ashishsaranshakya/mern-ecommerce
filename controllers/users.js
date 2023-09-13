@@ -1,11 +1,14 @@
 import User from "../models/User.js";
+import Product from "../models/Product.js";
 import logger from '../logger.js';
 
 export const addToCart = async (req, res) => {
-    const { productId } = req.body;
+    const { id: productId } = req.query;
     const userId = req.user.user_id; 
-
     try {
+        const product = await Product.findById(productId);
+        if(!product) return res.status(400).json({ error: "Product not found" });
+
         const user = await User.findById(userId);
         const existingIndex = user.cart.findIndex(item => item.productId === productId);
         const updateQuery = {};
@@ -33,16 +36,15 @@ export const addToCart = async (req, res) => {
 };
 
 export const deleteFromCart = async (req, res) => {
-    const { productId, single } = req.body;
+    const { id: productId, single = "true" } = req.query;
     const userId = req.user.user_id; 
-
     try {
         const user = await User.findById(userId);
         const existingIndex = user.cart.findIndex(item => item.productId === productId);
         const updateQuery = {};
 
         if (existingIndex !== -1) {
-            if (single && user.cart[existingIndex].quantity > 1) {
+            if (single !== "false" && user.cart[existingIndex].quantity > 1) {
                 updateQuery.$inc = { [`cart.${existingIndex}.quantity`]: -1 };
             } else {
                 updateQuery.$pull = { cart: { productId } };
