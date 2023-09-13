@@ -26,3 +26,8 @@ export const validateRegisterData = [
         max:20
     })
 ];
+
+export const validateLoginData = [
+    body("email", 'Email is invalid.').isEmail(),
+    body("password", 'Password cannot be empty.').notEmpty()
+];

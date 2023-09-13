@@ -5,15 +5,16 @@ import { razorpayInstance } from "../index.js";
 import crypto from "crypto";
 import { Types } from 'mongoose';
 import _ from 'lodash';
-import logger from '../logger.js';
+import logger from '../utils/logger.js';
+import { createAPIError } from '../utils/APIError.js';
 
-export const checkoutProduct = async (req, res) => {
+export const checkoutProduct = async (req, res, next) => {
     try{
         const { user_id } = req.user;
         const { id: product_id, quantity = 1 } = req.query;
         
         const product = await Product.findById(product_id);
-        if(!product) return res.status(400).json({ error: "Product not found" });
+        if(!product) return next(createAPIError(404, true, "Product not found"));
 
         const options = {
             amount: Number(product.cost * quantity * 100),
@@ -50,18 +51,18 @@ export const checkoutProduct = async (req, res) => {
     }
     catch(error){
         logger.error(`Error while creating order: ${error.message}`);
-        res.status(500).json({error: error.message});
+        next(error);
     }
 };
 
-export const checkoutCart = async (req, res) => {
+export const checkoutCart = async (req, res, next) => {
     try{
         const { user_id } = req.user;
         const user = await User.findById(user_id);
 
         if(user.cart.length === 0){
             logger.error(`User ${user_id} has no products in cart`);
-            return res.status(400).json({error: "Cart is empty"});
+            return next(createAPIError(400, true, "Cart is empty"));
         }
         
         const productIds = user.cart.map(product => new Types.ObjectId(product.productId));
@@ -110,11 +111,11 @@ export const checkoutCart = async (req, res) => {
     }
     catch(error){
         logger.error(`Error while creating order: ${error.message}`);
-        res.status(500).json({error: error.message});
+        next(error);
     }
 };
 
-export const paymentVerification = async (req, res) => {
+export const paymentVerification = async (req, res, next) => {
     try{
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
@@ -146,27 +147,27 @@ export const paymentVerification = async (req, res) => {
     }
     catch(error){
         logger.error(`Error while verifying payment: ${error.message}`);
-        res.status(500).json({error: error.message});
+        next(error);
     }
 };
 
-export const getOrder = async (req, res) => {
+export const getOrder = async (req, res, next) => {
     try{
         const order = await Order.findById(req.params.id);
         if(order.userId !== req.user.user_id){
             logger.error(`User ${req.user.user_id} not authorized to view order ${req.params.id}`);
-            return res.status(403).json({error: "User not authorized to view this order"});
+            return next(createAPIError(404, true, "User not authorized to view this order"));
         }
         logger.info(`Order ${req.params.id} fetched for user ${req.user.user_id}`);
-        res.status(200).json(order);
+        res.status(200).json({success: true, order});
     }
     catch(error){
         logger.error(`Error while fetching order ${req.params.id}: ${error.message}`);
-        res.status(404).json({error: error.message});
+        next(error);
     }
 }
 
-export const getUserOrders = async (req, res) => {
+export const getUserOrders = async (req, res, next) => {
     try{
         const { page = 1, limit = 10, sort = "desc" } = req.query;
 
@@ -179,10 +180,10 @@ export const getUserOrders = async (req, res) => {
             });
         
         logger.info(`Orders fetched for user ${req.user.user_id}`);
-        res.status(200).json(orders.docs);
+        res.status(200).json({success: true, orders: orders.docs});
     }
     catch(error){
         logger.error(`Error while fetching orders: ${error.message}`);
-        res.status(404).json({error: error.message});
+        next(error);
     }
 }

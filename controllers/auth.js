@@ -2,7 +2,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
 import User from '../models/User.js';
-import logger from '../logger.js';
+import logger from '../utils/logger.js';
+import { createAPIError } from '../utils/APIError.js';
 
 /* CREATE TOKEN */
 export const createToken = (_id) =>{
@@ -18,20 +19,20 @@ export const createToken = (_id) =>{
 }
 
 /* REGISTER */
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
     try{
         const {firstName,lastName,email,password,location,occupation} = req.body;
 
         const errors=validationResult(req);
         if(!errors.isEmpty()){
             logger.error(`Error while registering user: ${errors.array()}`);
-            return res.status(400).json({errors: errors.array()});
+            return next(createAPIError(400, false, "", errors.array()));
         }
 
         const user=await User.findOne({email});
         if(!!user){
             logger.error(`User already exists for email ${email}`);
-            return res.status(400).json({error: 'User already exists'});
+            return next(createAPIError(400, false, 'User already exists'));
         }
 
         const salt= await bcrypt.genSalt();
@@ -47,29 +48,35 @@ export const register = async (req, res) => {
         });
         await newUser.save();
         logger.info(`User ${email} registered successfully`);
-        res.status(201).json({message:'User created successfully'});
+        res.status(201).json({success: true, message: 'User created successfully'});
     }
     catch(err){
         logger.error(`Error while registering user: ${err.message}`);
-        res.status(500).json({error: err.message});
+        next(err);
     }
 }
 
 /* LOGIN */
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
     try{
-        const {email,password} = req.body;
+        const {email, password} = req.body;
+
+        const errors=validationResult(req);
+        if(!errors.isEmpty()){
+            logger.error(`Error while registering user: ${errors.array()}`);
+            return next(createAPIError(400, false, "", errors.array()));
+        }
         
         const user=await User.findOne({email});
         if(!user) {
             logger.error(`User not found for email ${email}`);
-            return res.status(400).json({error: "User not found"});
+            return next(createAPIError(400, false, "User not found"));
         }
         
         const isMatch = await bcrypt.compare(password, user.password);
         if(!isMatch){
             logger.error(`Invalid credentials for user ${email}`);
-            return res.status(400).json({error: "Invalid credentials"});
+            return next(createAPIError(400, false, "Invalid credentials"));
         }
 
         const token = createToken(user.id);
@@ -85,22 +92,22 @@ export const login = async (req, res) => {
         };
         
         logger.info(`User ${email} logged in successfully`);
-        res.status(200).cookie('token',token,options).send();
+        res.status(200).cookie('token',token,options).json({success: true, user: user});
     }
     catch(err){
         logger.error(`Error while logging in user: ${err.message}`);
-        res.status(500).json({error: err.message});
+        next(err);
     }
 }
 
 /* LOGOUT */
-export const logout = async (req, res) => {
+export const logout = async (req, res, next) => {
     try{
         logger.info(`User ${req.user.email} logged out successfully`);
-        res.status(200).clearCookie('token').send();
+        res.status(200).clearCookie('token').json({success: true});
     }
     catch(err){
         logger.error(`Error while logging out user: ${err.message}`);
-        res.status(500).json({error: err.message});
+        next(err);
     }
 }

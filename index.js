@@ -11,12 +11,11 @@ import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import userRoutes from './routes/users.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
 const app = express();
 app.use(express.json());
-app.use(bodyParser.json({limit: '30mb', extended: true}));
-app.use(bodyParser.urlencoded({limit: '30mb', extended: true}));
 
 const corsOptions = {
     origin: "*",
@@ -29,6 +28,7 @@ app.use('/auth', authRoutes);
 app.use('/product', productRoutes);
 app.use('/order', orderRoutes);
 app.use('/user', userRoutes);
+app.use(errorHandler);
 
 /* HTTPS SETUP */
 const privateKey = fs.readFileSync('./certs/key.pem', 'utf8');
@@ -48,6 +48,6 @@ mongoose.connect(process.env.MONGO_URL,
 
 /* RAZORPAY SETUP */
 export const razorpayInstance = new Razorpay({
-        key_id: process.env.RAZORPAY_API_KEY,
-        key_secret: process.env.RAZORPAY_API_SECRET,
-    });
+    key_id: process.env.RAZORPAY_API_KEY,
+    key_secret: process.env.RAZORPAY_API_SECRET,
+});

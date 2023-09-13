@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import logger from '../logger.js';
+import logger from '../utils/logger.js';
 import { createToken } from '../controllers/auth.js';
 
 
