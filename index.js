@@ -12,6 +12,7 @@ import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import userRoutes from './routes/users.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { routeNotFoundHandler } from './middleware/routeNotFoundHandler.js';
 
 dotenv.config();
 const app = express();
@@ -24,10 +25,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 /* ROUTES */
-app.use('/auth', authRoutes);
-app.use('/product', productRoutes);
-app.use('/order', orderRoutes);
-app.use('/user', userRoutes);
+const baseUrl = '/api/v1';
+app.use(`${baseUrl}/auth`, authRoutes);
+app.use(`${baseUrl}/product`, productRoutes);
+app.use(`${baseUrl}/order`, orderRoutes);
+app.use(`${baseUrl}/user`, userRoutes);
+app.use(routeNotFoundHandler);
 app.use(errorHandler);
 
 /* HTTPS SETUP */

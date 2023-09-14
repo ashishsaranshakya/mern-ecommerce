@@ -1,12 +1,13 @@
 import jwt from 'jsonwebtoken';
 import logger from '../utils/logger.js';
 import { createToken } from '../controllers/auth.js';
+import { createAPIError } from '../utils/APIError.js';
 
 
 export const verifyToken = (req, res, next) => {
     try{
         let token=req.header("Cookie");
-        if(!token || !token.startsWith("token=")) return res.status(401).json({error: "Unauthorized"});
+        if(!token || !token.startsWith("token=")) return next(createAPIError(401, false, 'Unauthorized'));
 
         token=token.slice(6,token.length).trimLeft();
         const verified=jwt.verify(
@@ -26,7 +27,7 @@ export const verifyToken = (req, res, next) => {
     }
     catch(err){
         logger.error(err.message);
-        res.status(501).json({error: err.message});
+        next(err);
     }
 };
 

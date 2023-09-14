@@ -24,7 +24,7 @@ export const checkoutProduct = async (req, res, next) => {
     
         const newOrder = new Order({
             userId: user_id,
-            products: [{productId: product_id, quantity}],
+            products: [{productId: product_id, quantity: Number(quantity)}],
             paymentId: order.id,
             paymentStatus: 'Pending',
             totalCost: product.cost * quantity
@@ -153,7 +153,11 @@ export const paymentVerification = async (req, res, next) => {
 
 export const getOrder = async (req, res, next) => {
     try{
-        const order = await Order.findById(req.params.id);
+        const order = await Order.findById(req.params.id,{
+            updatedAt: 0,
+            createdAt: 0,
+            __v: 0
+        });
         if(order.userId !== req.user.user_id){
             logger.error(`User ${req.user.user_id} not authorized to view order ${req.params.id}`);
             return next(createAPIError(404, true, "User not authorized to view this order"));
@@ -176,7 +180,8 @@ export const getUserOrders = async (req, res, next) => {
             {
                 page,
                 limit,
-                sort: { updatedAt: sort === 'asc' ? 1 : -1 }
+                sort: { updatedAt: sort === 'asc' ? 1 : -1 },
+                select: { updatedAt: 0, createdAt: 0, __v: 0 }
             });
         
         logger.info(`Orders fetched for user ${req.user.user_id}`);

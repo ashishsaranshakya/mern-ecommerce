@@ -20,34 +20,21 @@ export const getProducts = async (req, res, next) => {
             { 
                 page,
                 limit,
-                sort: { cost: sort === 'asc' ? 1 : -1 }
-            }
-        );
-
-        const simplifiedProducts = products.docs.map(product => {
-            let userRating = null;
-            if (userId) {
-                const userRatingObj = product.ratings.find(rating => rating.userId === userId);
-                if (userRatingObj) {
-                    userRating = userRatingObj.value;
+                sort: { cost: sort === 'asc' ? 1 : -1 },
+                select: { 
+                    description: 0, 
+                    ratings: 0, 
+                    updatedAt: 0, 
+                    createdAt: 0,
+                    __v: 0 
                 }
             }
-
-            return {
-                _id: product._id,
-                name: product.name,
-                description: product.description,
-                cost: product.cost,
-                imageUrl: product.imageUrl,
-                rating: product.rating,
-                userRating: userRating
-            };
-        });
+        );
 
         if(searchTerm) logger.info(`Products searched successfully for: ${searchTerm}`);
         else logger.info(`All products fetched successfully`);
 
-        res.status(200).json({success: true, products: simplifiedProducts});
+        res.status(200).json({success: true, products: products.docs});
     }
     catch (error) {
         logger.error(`Error while getting all products: ${error.message}`);
@@ -61,7 +48,7 @@ export const getProduct = async (req, res, next) => {
         if(req.user){
             userId = req.user.user_id;
         }
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findById(req.params.id, { updatedAt: 0, createdAt: 0, __v: 0 });
         if (!product) {
             return next(createAPIError(404, true, `Product ${req.params.id} not found`));
         }
@@ -81,7 +68,7 @@ export const getProduct = async (req, res, next) => {
             cost: product.cost,
             imageUrl: product.imageUrl,
             rating: product.rating,
-            userRating: userRating
+            userRating
         };
         
         logger.info(`Product ${req.params.id} fetched successfully`);
@@ -99,30 +86,42 @@ export const rateProduct = async (req, res, next) => {
         const userId = req.user.user_id;
         const productId = req.params.id;
         
-        const orders = await Order.find({userId: userId});
+        const orders = await Order.find({userId: userId, paymentStatus: 'Confirmed'});
         let hasUserOrdered = false;
         orders.forEach(order => {
-            if (order.productIds.includes(productId)) {
-                hasUserOrdered = true;
-            }
+            order.products.forEach(product => {
+                if(product.productId === productId){
+                    hasUserOrdered = true;
+                }
+            })
         });
         if(!hasUserOrdered) {
+            logger.error(`User ${userId} has not ordered product ${productId} yet.`);
             return next(createAPIError(404, true, 'User has not ordered this product yet.'));
         }
 
         const product = await Product.findById(productId);
         const existingRatingIndex = product.ratings.findIndex((rating) => rating.userId === userId);
         
+        let totalRatings = product.rating * product.ratings.length;
+
+        const updateQuery = {};
         if (existingRatingIndex !== -1) {
-            product.ratings[existingRatingIndex].value = rating;
+            totalRatings = totalRatings - product.ratings[existingRatingIndex].value + Number(rating);
+            updateQuery.$set = { 
+                [`ratings.${existingRatingIndex}.value`]: Number(rating) ,
+                rating: totalRatings / product.ratings.length
+            };
         } else {
-            product.ratings.push({ userId: userId, value: rating });
+            totalRatings = totalRatings + Number(rating);
+            updateQuery.$push = { ratings: { userId: userId, value: Number(rating) } };
+            updateQuery.$set = { rating: totalRatings / (product.ratings.length + 1) };
         }
         
-        const totalRatings = product.ratings.reduce((sum, rating) => sum + rating.value, 0);
-        product.rating = totalRatings / product.ratings.length;
-        
-        await product.save();
+        await Product.updateOne(
+            { _id: productId },
+            updateQuery
+        );
         logger.info(`Product ${req.params.id} rated successfully by user ${userId}`);
         res.status(200).json({success: true, message: "Rating updated successfully"});
     }

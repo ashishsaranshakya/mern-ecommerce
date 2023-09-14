@@ -3,6 +3,40 @@ import Product from "../models/Product.js";
 import logger from '../utils/logger.js';
 import { createAPIError } from '../utils/APIError.js';
 
+export const getCart = async (req, res, next) => {
+    const userId = req.user.user_id;
+    try {
+        const user = await User.findById(userId);
+        logger.info(`Cart of user ${userId} fetched successfully`);
+        
+        return res.status(200).json({
+            success: true,
+            cart: user.cart
+        });
+    }
+    catch (error) {
+        logger.error(`Error fetching cart of user ${userId}: error.message`);
+        next(error);
+    }
+}
+
+export const getProfile = async (req, res, next) => {
+    const userId = req.user.user_id;
+    try {
+        const user = await User.findById(userId, { updatedAt: 0, createdAt: 0, __v: 0 });
+        user.password=undefined;
+        logger.info(`Profile of user ${userId} fetched successfully`);
+        return res.status(200).json({
+            success: true,
+            user
+        });
+    }
+    catch (error) {
+        logger.error(`Error fetching profile of user ${userId}: error.message`);
+        next(error);
+    }
+}
+
 export const addToCart = async (req, res, next) => {
     const { id: productId } = req.query;
     const userId = req.user.user_id; 

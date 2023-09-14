@@ -81,8 +81,8 @@ export const login = async (req, res, next) => {
 
         const token = createToken(user.id);
 
-        user.token=token
-        user.password=undefined
+        user.token=token;
+        user.password=undefined;
         
         const options={
             expires: new Date(Date.now()+(7*24*3600*1000)),
