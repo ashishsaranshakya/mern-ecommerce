@@ -91,6 +91,16 @@ RAZORPAY_API_SECRET='Razorpay_Api_Secret'
 
 ### User
 
+- **Get User Profile**
+  - Method: GET
+  - Endpoint: `/user/profile`
+  - Description: Get logged in user profile data.
+
+- **Get User Cart**
+  - Method: GET
+  - Endpoint: `/user/cart`
+  - Description: Get logged in user cart.
+
 - **Add to Cart**
   - Method: POST
   - Endpoint: `/user/cart`
