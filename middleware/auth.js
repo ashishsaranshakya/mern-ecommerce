@@ -6,16 +6,18 @@ import { createAPIError } from '../utils/APIError.js';
 
 export const verifyToken = (req, res, next) => {
     try{
-        let token=req.header("Cookie");
-        if(!token || !token.startsWith("token=")) return next(createAPIError(401, false, 'Unauthorized'));
+        const token = req.signedCookies.token;
+        if (!token) {
+            logger.error('Error while verifying token: No token provided')
+            return next(createAPIError(401, false, 'Unauthorized'));
+        }
 
-        token=token.slice(6,token.length).trimLeft();
-        const verified=jwt.verify(
+        const verified = jwt.verify(
             token,
             process.env.JWT_SECRET,
             { ignoreExpiration: false }
         );
-        req.user=verified;
+        req.user = verified;
         const currentTimestamp = Math.floor(Date.now() / 1000);
 
         if((verified.exp-currentTimestamp)/(60*60*24)<1){
@@ -33,11 +35,8 @@ export const verifyToken = (req, res, next) => {
 
 export const verifyTokenForRating = (req, res, next) => {
     try{
-        let token=req.header("Cookie");
+        const token = req.signedCookies.token;
         
-        if(token.startsWith("token=")){
-            token=token.slice(6,token.length).trimLeft();
-        } 
         const verified=jwt.verify(
             token,
             process.env.JWT_SECRET,
@@ -69,6 +68,7 @@ const updateToken = (req, res, verified) => {
         httpOnly:true,
         sameSite: 'strict',
         secure: true,
+        signed: true
     };
     
     logger.info(`Token updated for user ${verified.user_id}`);

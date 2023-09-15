@@ -4,7 +4,7 @@ import {verifyToken, verifyTokenForRating} from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', verifyTokenForRating, getProducts);
+router.get('/', getProducts);
 router.get('/:id', verifyTokenForRating, getProduct);
 
 router.patch('/:id/rate', verifyToken, rateProduct);

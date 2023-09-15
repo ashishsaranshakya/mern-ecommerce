@@ -1,7 +1,7 @@
 import winston from 'winston';
 import moment from 'moment-timezone';
 
-const timezone = process.env.TZ || 'Asia/Chennai';
+const timezone = process.env.TZ || 'Asia/Kolkata';
 
 const customTimestamp = () => {
     const now = moment().tz(timezone);

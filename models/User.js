@@ -29,8 +29,14 @@ const UserSchema = mongoose.Schema({
         type: Array,
         default: []
     },
-    location: String,
-    occupation: String
+    location: {
+        type: String,
+        default: null
+    },
+    occupation: {
+        type: String,
+        default: null
+    }
 }, { timestamps: true });
 
 const User = mongoose.model('User', UserSchema);

@@ -1,5 +1,5 @@
 import express from 'express';
-import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -17,6 +17,7 @@ import { routeNotFoundHandler } from './middleware/routeNotFoundHandler.js';
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 const corsOptions = {
     origin: "*",
@@ -25,7 +26,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 /* ROUTES */
-const baseUrl = '/api/v1';
+const baseUrl = `/api/${process.env.API_VERSION}`;
+app.get(`${baseUrl}`,(req, res) => res.status(200).json({success: true, message: 'Cittaa Ecommerce API'}))
 app.use(`${baseUrl}/auth`, authRoutes);
 app.use(`${baseUrl}/product`, productRoutes);
 app.use(`${baseUrl}/order`, orderRoutes);

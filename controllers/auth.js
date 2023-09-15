@@ -14,6 +14,7 @@ export const createToken = (_id) =>{
         process.env.JWT_SECRET,
         {
             expiresIn:"7d",
+            algorithm: 'HS512'
         }
     )
 }
@@ -67,7 +68,7 @@ export const login = async (req, res, next) => {
             return next(createAPIError(400, false, "", errors.array()));
         }
         
-        const user=await User.findOne({email});
+        const user=await User.findOne({email},{createdAt:0,updatedAt:0,__v:0});
         if(!user) {
             logger.error(`User not found for email ${email}`);
             return next(createAPIError(400, false, "User not found"));
@@ -82,13 +83,14 @@ export const login = async (req, res, next) => {
         const token = createToken(user.id);
 
         user.token=token;
-        user.password=undefined;
+        user.password = undefined;
         
         const options={
             expires: new Date(Date.now()+(7*24*3600*1000)),
             httpOnly: true,
             sameSite: 'strict',
             secure: true,
+            signed: true
         };
         
         logger.info(`User ${email} logged in successfully`);
@@ -103,7 +105,7 @@ export const login = async (req, res, next) => {
 /* LOGOUT */
 export const logout = async (req, res, next) => {
     try{
-        logger.info(`User ${req.user.email} logged out successfully`);
+        logger.info(`User ${req.user.user_id} logged out successfully`);
         res.status(200).clearCookie('token').json({success: true});
     }
     catch(err){

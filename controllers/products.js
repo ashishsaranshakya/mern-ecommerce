@@ -5,10 +5,6 @@ import { createAPIError } from '../utils/APIError.js';
 
 export const getProducts = async (req, res, next) => {
     try {
-        let userId = null;
-        if(req.user){
-            userId = req.user.user_id;
-        }
         const { page = 1, limit = 10, query: searchTerm = null, sort = "desc" } = req.query;
         
         let query = {};
