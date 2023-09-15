@@ -146,6 +146,12 @@ export const paymentVerification = async (req, res, next) => {
             order.paymentStatus = "Confirmed";
             await order.save();
 
+            order.products.forEach(async product => {
+                const productObj = await Product.findById(product.productId);
+                productObj.quantity -= product.quantity;
+                await productObj.save();
+            })
+
             logger.info(`Payment verified for order ${order._id}`);
             res.redirect(
                 `http://localhost:3000/paymentsuccess?reference=${order._id}`
