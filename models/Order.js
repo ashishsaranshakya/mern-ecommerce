@@ -25,6 +25,17 @@ const OrderSchema = mongoose.Schema(
         totalCost: {
             type: Number,
             required: true
+        },
+        address: {
+            type: String,
+            required: true,
+            max: 50
+        },
+        deliveryStatus: {
+            type: String,
+            required: true,
+            default: 'Pending',
+            enum: ['Delivered', 'Pending']
         }
     },
     { timestamps: true }

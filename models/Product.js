@@ -31,6 +31,15 @@ const ProductSchema = mongoose.Schema({
     rating: {
         type: Number,
         default: 0
+    },
+    vendorId: {
+        type: String,
+        required: true,
+        index: true
+    },
+    quantity: {
+        type: Number,
+        required: true
     }
 }, { timestamps: true });
 

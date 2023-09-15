@@ -22,7 +22,8 @@ export const getProducts = async (req, res, next) => {
                     ratings: 0, 
                     updatedAt: 0, 
                     createdAt: 0,
-                    __v: 0 
+                    __v: 0,
+                    vendorId: 0
                 }
             }
         );
@@ -44,7 +45,13 @@ export const getProduct = async (req, res, next) => {
         if(req.user){
             userId = req.user.user_id;
         }
-        const product = await Product.findById(req.params.id, { updatedAt: 0, createdAt: 0, __v: 0 });
+        const product = await Product.findById(req.params.id, {
+            updatedAt: 0,
+            createdAt: 0,
+            __v: 0,
+            vendorId: 0
+
+        });
         if (!product) {
             return next(createAPIError(404, true, `Product ${req.params.id} not found`));
         }

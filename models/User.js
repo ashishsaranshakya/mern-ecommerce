@@ -29,9 +29,10 @@ const UserSchema = mongoose.Schema({
         type: Array,
         default: []
     },
-    location: {
+    address: {
         type: String,
-        default: null
+        required: true,
+        max: 50,
     },
     occupation: {
         type: String,

@@ -5,7 +5,7 @@ import { razorpayInstance } from "../index.js";
 import crypto from "crypto";
 import { Types } from 'mongoose';
 import _ from 'lodash';
-import logger from '../utils/logger.js';
+import logger, { adminLogger } from '../utils/logger.js';
 import { createAPIError } from '../utils/APIError.js';
 
 export const checkoutProduct = async (req, res, next) => {
@@ -14,20 +14,27 @@ export const checkoutProduct = async (req, res, next) => {
         const { id: product_id, quantity = 1 } = req.query;
         
         const product = await Product.findById(product_id);
-        if(!product) return next(createAPIError(404, true, "Product not found"));
+        if (!product) return next(createAPIError(404, true, "Product not found"));
+        if (product.quantity < quantity) {
+            logger.error(`Product ${product_id} out of stock`);
+            adminLogger.error(`Product ${product_id} out of stock`);
+            return next(createAPIError(400, true, "Product out of stock"));
+        }
 
         const options = {
             amount: Number(product.cost * quantity * 100),
             currency: "INR",
         };
         const order = await razorpayInstance.orders.create(options);
-    
+
+        const user = await User.findById(user_id);
         const newOrder = new Order({
             userId: user_id,
             products: [{productId: product_id, quantity: Number(quantity)}],
             paymentId: order.id,
             paymentStatus: 'Pending',
-            totalCost: product.cost * quantity
+            totalCost: product.cost * quantity,
+            address: user.address
         });
 
         const prevOrder = await Order.findOne({ 
@@ -70,6 +77,11 @@ export const checkoutCart = async (req, res, next) => {
 
         let totalAmount = 0;
         products.forEach(product => {
+            if(product.quantity < user.cart.find(item => item.productId === product._id.toString()).quantity){
+                logger.error(`Product ${product._id} out of stock`);
+                adminLogger.error(`Product ${product._id} out of stock`);
+                return next(createAPIError(400, true, "Product out of stock"));
+            }
             totalAmount += product.cost;
         });
         const options = {
@@ -83,7 +95,8 @@ export const checkoutCart = async (req, res, next) => {
             products: user.cart,
             paymentId: order.id,
             paymentStatus: 'Pending',
-            totalCost: totalAmount
+            totalCost: totalAmount,
+            address: user.address
         });
         
         const prevOrders = await Order.find({ userId: user_id, paymentStatus: 'Pending' });
