@@ -19,8 +19,9 @@ export const validateRegisterData = [
             return passwordPattern.test(value);
         })
         .withMessage('Password must contain atleast one uppercase letter, one number and one special character'),
-    body("location", 'Location should be less than 20 characters long.').isLength({
-        max:20
+    body("address", 'Address should be less than 50 characters long.').isLength({
+        min:2,
+        max:50
     }),
     body("occupation", 'Occupation should be less than 20 characters long.').isLength({
         max:20

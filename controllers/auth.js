@@ -22,7 +22,7 @@ export const createToken = (_id) =>{
 /* REGISTER */
 export const register = async (req, res, next) => {
     try{
-        const {firstName,lastName,email,password,location,occupation} = req.body;
+        const {firstName,lastName,email,password,address,occupation} = req.body;
 
         const errors=validationResult(req);
         if(!errors.isEmpty()){
@@ -44,7 +44,7 @@ export const register = async (req, res, next) => {
             lastName,
             email,
             password: hashedPassword,
-            location,
+            address,
             occupation
         });
         await newUser.save();
