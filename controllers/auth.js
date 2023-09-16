@@ -88,7 +88,7 @@ export const login = async (req, res, next) => {
         const options={
             expires: new Date(Date.now()+(7*24*3600*1000)),
             httpOnly: true,
-            sameSite: 'strict',
+            sameSite: 'None',
             secure: true,
             signed: true
         };

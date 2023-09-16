@@ -64,9 +64,9 @@ const updateToken = (req, res, verified) => {
     verified.password=undefined
 
     const options={
-        expires:new Date(Date.now()+(7*24*3600*1000)),
-        httpOnly:true,
-        sameSite: 'strict',
+        expires: new Date(Date.now()+(7*24*3600*1000)),
+        httpOnly: true,
+        sameSite: 'None',
         secure: true,
         signed: true
     };

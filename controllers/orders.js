@@ -82,7 +82,7 @@ export const checkoutCart = async (req, res, next) => {
                 adminLogger.error(`Product ${product._id} out of stock`);
                 return next(createAPIError(400, true, "Product out of stock"));
             }
-            totalAmount += product.cost;
+            totalAmount += (product.cost * user.cart.find(item => item.productId === product._id.toString()).quantity);
         });
         const options = {
             amount: Number(totalAmount * 100),
