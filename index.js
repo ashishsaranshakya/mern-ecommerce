@@ -1,39 +1,10 @@
-import express from 'express';
-import cookieParser from 'cookie-parser';
-import mongoose from 'mongoose';
-import cors from 'cors';
 import dotenv from 'dotenv';
-import Razorpay from "razorpay";
+dotenv.config();
+
 import https from 'https';
 import fs from 'fs';
-
-import authRoutes from './routes/auth.js';
-import productRoutes from './routes/products.js';
-import orderRoutes from './routes/orders.js';
-import userRoutes from './routes/users.js';
-import { errorHandler } from './middleware/errorHandler.js';
-import { routeNotFoundHandler } from './middleware/routeNotFoundHandler.js';
-
-dotenv.config();
-const app = express();
-app.use(express.json());
-app.use(cookieParser(process.env.COOKIE_SECRET));
-
-const corsOptions = {
-    origin: "*",
-    credentials: true
-};
-app.use(cors(corsOptions));
-
-/* ROUTES */
-const baseUrl = `/api/${process.env.API_VERSION}`;
-app.get(`${baseUrl}`,(req, res) => res.status(200).json({success: true, message: 'Cittaa Ecommerce API'}))
-app.use(`${baseUrl}/auth`, authRoutes);
-app.use(`${baseUrl}/product`, productRoutes);
-app.use(`${baseUrl}/order`, orderRoutes);
-app.use(`${baseUrl}/user`, userRoutes);
-app.use(routeNotFoundHandler);
-app.use(errorHandler);
+import app from './app.js';
+import { mongoConnect } from './services/mongo.js';
 
 /* HTTPS SETUP */
 const privateKey = fs.readFileSync('./certs/key.pem', 'utf8');
@@ -41,18 +12,11 @@ const certificate = fs.readFileSync('./certs/cert.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 const httpsServer = https.createServer(credentials, app);
 
-/* MONGOOSE SETUP */
-const PORT = process.env.PORT || 6001;
-mongoose.connect(process.env.MONGO_URL, 
-    {
-        useNewUrlParser: true, 
-        useUnifiedTopology: true
-    })
-    .then(() => httpsServer.listen(PORT, () => console.log(`Server running on port: ${PORT}`)))
-    .catch((error) => console.log(error.message));
+const startServer = async () => {
+    await mongoConnect();
+    httpsServer.listen(process.env.PORT, () => {
+        console.log(`Server running on port: ${process.env.PORT}`)
+    });
+}
 
-/* RAZORPAY SETUP */
-export const razorpayInstance = new Razorpay({
-    key_id: process.env.RAZORPAY_API_KEY,
-    key_secret: process.env.RAZORPAY_API_SECRET,
-});
+startServer();

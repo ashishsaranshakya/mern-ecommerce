@@ -1,7 +1,7 @@
 import Order from '../models/Order.js';
 import Product from "../models/Product.js";
 import User from "../models/User.js";
-import { razorpayInstance } from "../index.js";
+import { razorpayInstance } from "../services/razorpay.js";
 import crypto from "crypto";
 import { Types } from 'mongoose';
 import _ from 'lodash';
