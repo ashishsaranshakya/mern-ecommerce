@@ -25,6 +25,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
+  "jest": {
+    "maxWorkers": 1,
+    "testTimeout": 50000
+  },
   "scripts": {
     "prod": "nodemon index.js",
     "dev": "nodemon index.js",

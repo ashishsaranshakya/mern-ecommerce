@@ -64,7 +64,7 @@ export const login = async (req, res, next) => {
 
         const errors=validationResult(req);
         if(!errors.isEmpty()){
-            logger.error(`Error while registering user: ${errors.array()}`);
+            logger.error(`Error while logging in user: ${errors.array()}`);
             return next(createAPIError(400, false, "", errors.array()));
         }
         

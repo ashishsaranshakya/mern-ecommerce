@@ -58,7 +58,7 @@ export const getProduct = async (req, res, next) => {
         
         let userRating = null;
         if (userId) {
-            const userRatingObj = product.ratings.find(rating => rating.userId.toString() === userId);
+            const userRatingObj = product.ratings.find(rating => rating.userId === userId);
             if (userRatingObj) {
                 userRating = userRatingObj.value;
             }
@@ -89,7 +89,7 @@ export const rateProduct = async (req, res, next) => {
         const userId = req.user.user_id;
         const productId = req.params.id;
         
-        const orders = await Order.find({userId: userId, paymentStatus: 'Confirmed'});
+        const orders = await Order.find({ userId: userId, paymentStatus: 'Confirmed' });
         let hasUserOrdered = false;
         orders.forEach(order => {
             order.products.forEach(product => {
@@ -100,7 +100,7 @@ export const rateProduct = async (req, res, next) => {
         });
         if(!hasUserOrdered) {
             logger.error(`User ${userId} has not ordered product ${productId} yet.`);
-            return next(createAPIError(404, true, 'User has not ordered this product yet.'));
+            return next(createAPIError(400, true, 'User has not ordered this product yet.'));
         }
 
         const product = await Product.findById(productId);
