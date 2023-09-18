@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import Product from "../models/Product.js";
-import logger from '../utils/logger.js';
+import logger from '../services/logger.js';
 import { createAPIError } from '../utils/APIError.js';
 
 export const getCart = async (req, res, next) => {

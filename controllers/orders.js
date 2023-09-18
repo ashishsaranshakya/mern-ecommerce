@@ -5,7 +5,7 @@ import { razorpayInstance } from "../index.js";
 import crypto from "crypto";
 import { Types } from 'mongoose';
 import _ from 'lodash';
-import logger, { adminLogger } from '../utils/logger.js';
+import logger, { adminLogger } from '../services/logger.js';
 import { createAPIError } from '../utils/APIError.js';
 
 export const checkoutProduct = async (req, res, next) => {

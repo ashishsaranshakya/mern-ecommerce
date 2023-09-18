@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
 import User from '../models/User.js';
-import logger from '../utils/logger.js';
+import logger from '../services/logger.js';
 import { createAPIError } from '../utils/APIError.js';
 
 /* CREATE TOKEN */

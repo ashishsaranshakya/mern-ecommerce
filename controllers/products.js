@@ -1,6 +1,6 @@
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
-import logger from '../utils/logger.js';
+import logger from '../services/logger.js';
 import { createAPIError } from '../utils/APIError.js';
 
 export const getProducts = async (req, res, next) => {

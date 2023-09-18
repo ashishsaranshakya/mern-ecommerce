@@ -27,4 +27,18 @@ const logger = winston.createLogger({
     ]
 });
 
+export const adminLogger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp({ format: customTimestamp }),
+        winston.format.json()
+    ),
+    defaultMeta: { service: 'cittaa-backend' },
+    transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({ filename: 'logs/admin.error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'logs/admin.combined.log' }),
+    ]
+});
+
 export default logger;
