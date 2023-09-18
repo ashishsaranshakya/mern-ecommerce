@@ -28,6 +28,7 @@
   "scripts": {
     "prod": "nodemon index.js",
     "dev": "nodemon index.js",
+    "populate": "node ./utils/populateDB.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "author": "",
