@@ -22,6 +22,17 @@ describe('Product endpoints', () => {
         await User.deleteMany();
     });
 
+    describe('GET /api/v1/', () => {
+        it('should return cittaa backend message', async () => {
+            const response = await request(app)
+                .get('/api/v1/');
+
+            expect(response.status).toBe(20);
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('Cittaa Ecommerce API');
+        });
+    });
+
     describe('POST /api/v1/auth/register', () => {
         it('should register new user', async () => {
             const response = await request(app)
