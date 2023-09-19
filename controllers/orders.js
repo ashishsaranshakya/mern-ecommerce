@@ -181,6 +181,15 @@ export const getOrder = async (req, res, next) => {
             logger.error(`User ${req.user.user_id} not authorized to view order ${req.params.id}`);
             return next(createAPIError(404, true, "User not authorized to view this order"));
         }
+
+        const products = await Promise.all(order.products.map(async (productInOrder) => {
+            const product = await Product.findOne(
+                { _id: productInOrder.productId },
+                { __v: 0, createdAt: 0, updatedAt: 0, ratings: 0, vendorId: 0, rating: 0, quantity: 0 });
+            return { product, quantity: productInOrder.quantity };
+        }));
+        order.products = products;
+
         logger.info(`Order ${req.params.id} fetched for user ${req.user.user_id}`);
         res.status(200).json({success: true, order});
     }
@@ -203,8 +212,18 @@ export const getUserOrders = async (req, res, next) => {
                 select: { updatedAt: 0, createdAt: 0, __v: 0 }
             });
         
+        const ordersWithProducts = await Promise.all(orders.docs.map(async (order) => {
+            const products = await Promise.all(order.products.map(async (productInOrder) => {
+                const product = await Product.findOne(
+                    { _id: productInOrder.productId },
+                    { __v: 0, createdAt: 0, updatedAt: 0, ratings: 0, vendorId: 0, rating: 0, quantity: 0 });
+                return { product, quantity: productInOrder.quantity };
+            }));
+            return { ...order.toObject(), products };
+        }));
+        
         logger.info(`Orders fetched for user ${req.user.user_id}`);
-        res.status(200).json({success: true, orders: orders.docs});
+        res.status(200).json({success: true, orders: ordersWithProducts});
     }
     catch(error){
         logger.error(`Error while fetching orders: ${error.message}`);

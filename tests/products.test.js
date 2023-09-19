@@ -73,7 +73,7 @@ describe('Product endpoints', () => {
         });
     });
 
-    describe('POST /api/v1/auth/login', () => {
+    describe('GET /api/v1/product/:id', () => {
         it('should login registered user', async () => {
             const salt = await bcrypt.genSalt();
             const hashedPassword = await bcrypt.hash(password, salt);
@@ -101,9 +101,7 @@ describe('Product endpoints', () => {
             
             cookie = response.headers['set-cookie'][0].split(';')[0];
         })
-    })
 
-    describe('GET /api/v1/product/:id', () => {
         it('should return a product by id with user rating', async () => {
             const product = new Product({
                 name: 'Product 1',

@@ -2,17 +2,23 @@ import { mongoConnect, mongoDisconnect } from '../services/mongo.js';
 import Product from '../models/Product.js';
 import Admin from '../models/Admin.js';
 import User from '../models/User.js';
+import Order from '../models/Order.js';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 dotenv.config();
 
 await mongoConnect();
+await Admin.deleteMany({});
+await User.deleteMany({});
+await Product.deleteMany({});
+await Order.deleteMany({});
+
 const salt= await bcrypt.genSalt();
 
 const admins = [
     new Admin({
         name: 'Super',
-        email: 'super-admin@gamil.com',
+        email: 'super-admin@gmail.com',
         password: await bcrypt.hash("P@ssw0rd", salt),
         role: 'Super-admin'
     }),
@@ -24,7 +30,7 @@ const admins = [
     }),
     new Admin({
         name: 'Vendor',
-        email: 'vendor@gamil.com',
+        email: 'vendor@gmail.com',
         password: await bcrypt.hash("P@ssw0rd", salt),
         role: 'Vendor'
     }),

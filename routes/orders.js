@@ -4,7 +4,7 @@ import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/user', verifyToken, getUserOrders);
+router.get('/', verifyToken, getUserOrders);
 router.get('/:id', verifyToken, getOrder);
 
 router.post('/checkout/product', verifyToken, checkoutProduct);
