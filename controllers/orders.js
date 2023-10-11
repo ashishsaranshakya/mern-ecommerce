@@ -128,6 +128,47 @@ export const checkoutCart = async (req, res, next) => {
     }
 };
 
+export const checkoutOrder = async (req, res, next) => {
+    try{
+        const { user_id } = req.user;
+        const { id: order_id } = req.query;
+        const user = await User.findById(user_id);
+
+        const savedOrder = await Order.findById(order_id);
+        if (!savedOrder) {
+            logger.error(`Order ${order_id} not found`);
+            return next(createAPIError(404, true, "Order not found"));
+        }
+        if (savedOrder.userId !== user_id) {
+            logger.error(`User ${user_id} not authorized to checkout order ${order_id}`);
+            return next(createAPIError(401, true, "User not authorized to checkout this order"));
+        }
+        if (savedOrder.paymentStatus === 'Confirmed') {
+            logger.error(`Order ${order_id} already confirmed`);
+            return next(createAPIError(400, true, "Order already confirmed"));
+        }
+
+        const options = {
+            amount: Number(savedOrder.totalCost * 100),
+            currency: "INR",
+        };
+        const order = await razorpayInstance.orders.create(options);
+        
+        savedOrder.paymentId = order.id;
+        await savedOrder.save();
+
+        logger.info(`Order updated for user ${user_id} for products ${savedOrder.products}`);
+        res.status(200).json({
+            success: true,
+            order
+        });
+    }
+    catch(error){
+        logger.error(`Error while creating order: ${error.message}`);
+        next(error);
+    }
+};
+
 export const paymentVerification = async (req, res, next) => {
     try{
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;

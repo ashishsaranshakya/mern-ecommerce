@@ -70,7 +70,7 @@ const products = [
         name: 'Book',
         description: 'Description 1',
         cost: 500,
-        imageUrl: 'https://example.com/image1.jpg',
+        imageUrl: 'https://img.freepik.com/free-photo/book-composition-with-open-book_23-2147690555.jpg?w=1060&t=st=1696851422~exp=1696852022~hmac=8bd793323bcc6bab5d0da89b78cbac9e3474c18cf448e53ad1e87c7da0265f5e',
         rating: 4.5,
         ratings: [
           { userId: savedUsers[0]._id, value: 4 },
@@ -80,10 +80,10 @@ const products = [
         vendorId: savedAdmins[2]._id
     }),
     new Product({
-        name: 'Bundle',
+        name: 'Plant',
         description: 'Description 1',
-        cost: 2000,
-        imageUrl: 'https://example.com/image1.jpg',
+        cost: 200,
+        imageUrl: 'https://www.collinsdictionary.com/images/full/plant_108417266_1000.jpg?version=4.0.333',
         rating: 4,
         ratings: [
           { userId: savedUsers[0]._id, value: 3 },
@@ -93,10 +93,10 @@ const products = [
         vendorId: savedAdmins[2]._id
     }),
     new Product({
-        name: 'Candles',
+        name: 'Candle',
         description: 'Description 1',
-        cost: 10,
-        imageUrl: 'https://example.com/image1.jpg',
+        cost: 100,
+        imageUrl: 'https://wmcd.b-cdn.net/wp-content/uploads/wallmantra-candles-fragrances-lavender-clear-glass-scented-candle-31082681401510.jpg',
         rating: 4,
         ratings: [
           { userId: savedUsers[1]._id, value: 4 }

@@ -104,9 +104,17 @@ export const login = async (req, res, next) => {
 
 /* LOGOUT */
 export const logout = async (req, res, next) => {
-    try{
+    try {
+        const options={
+            expires: new Date(Date.now()),
+            httpOnly: true,
+            sameSite: 'None',
+            secure: true,
+            signed: true
+        };
         logger.info(`User ${req.user.user_id} logged out successfully`);
-        res.status(200).clearCookie('token').json({success: true});
+        //res.status(200).cookie('token',token,options).json({success: true, user: user});
+        res.status(200).cookie('token','',options).json({success: true});
     }
     catch(err){
         logger.error(`Error while logging out user: ${err.message}`);
