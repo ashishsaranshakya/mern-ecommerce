@@ -21,7 +21,7 @@
     "supertest": "^6.3.3",
     "winston": "^3.10.0"
   },
-  "name": "backend",
+  "name": "MERN E-Commerce",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
@@ -30,9 +30,12 @@
     "testTimeout": 50000
   },
   "scripts": {
-    "prod": "nodemon index.js",
-    "dev": "nodemon index.js",
+    "client-install": "cd client && npm install",
+    "dev": "node index.js",
+    "client": "cd client && npm start",
     "populate": "node ./utils/populateDB.js",
+    "build": "cd client && npm run build",
+    "prod": "nodemon index.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
   },
