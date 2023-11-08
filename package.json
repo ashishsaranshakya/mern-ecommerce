@@ -21,7 +21,7 @@
     "supertest": "^6.3.3",
     "winston": "^3.10.0"
   },
-  "name": "MERN E-Commerce",
+  "name": "mern-ecommerce",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
