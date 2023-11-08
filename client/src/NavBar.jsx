@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Flex, Link, Image, Button } from '@chakra-ui/react';
 import axios from "axios";
+import { baseUrl } from './App';
 
 const NavBar = () => {
     const [user, setUser] = useState(null);
@@ -8,7 +9,7 @@ const NavBar = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get("http://localhost:3000/api/v1/user/profile", { withCredentials: true });
+                const response = await axios.get(`${baseUrl}/api/v1/user/profile`, { withCredentials: true });
                 if (response.data.user) {
                     setUser(response.data.user);
                     if (window.location.pathname === '/' || window.location.pathname === '/signup') {

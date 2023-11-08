@@ -3,6 +3,7 @@ import { Box, Stack, Button, Text } from "@chakra-ui/react";
 import OrderCard from './OrderCard';
 import axios from "axios";
 import NavBar from './NavBar';
+import { baseUrl } from './App';
 
 const Home = () => {
     const [orders, setOrders] = useState([]);
@@ -11,7 +12,7 @@ const Home = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await axios.get("http://localhost:3000/api/v1/order",
+                const response = await axios.get(`${baseUrl}/api/v1/order`,
                     { withCredentials: true });
                 setOrders(response.data.orders);
                 setLoading(false);
@@ -26,7 +27,7 @@ const Home = () => {
     const paymentHandler = async (order_id) => {
         const key = "rzp_test_aFTRo2L8JTS6Tf";
 
-        const { data: { order } } = await axios.post(`http://localhost:3000/api/v1/order/checkout/order?id=${order_id}`, 
+        const { data: { order } } = await axios.post(`${baseUrl}/api/v1/order/checkout/order?id=${order_id}`, 
             { },
             {
                 withCredentials: true
@@ -40,7 +41,7 @@ const Home = () => {
             description: "Tutorial of RazorPay",
             image: "https://avatars.githubusercontent.com/u/25058652?v=4",
             order_id: order.id,
-            callback_url: "http://localhost:3001/api/v1/order/verify",
+            callback_url: `${baseUrl}/api/v1/order/verify`,
             prefill: {
                 name: "Gaurav Kumar",
                 email: "gaurav.kumar@example.com",

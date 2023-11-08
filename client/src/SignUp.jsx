@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Box, Stack, Button, Text, Input } from "@chakra-ui/react";
 import NavBar from './NavBar';
+import { baseUrl } from './App';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ const SignUp = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-        const res = await axios.post('http://localhost:3000/api/v1/auth/register',
+        const res = await axios.post(`${baseUrl}/api/v1/auth/register`,
             {
                 firstName: fname,
                 lastName: lname,

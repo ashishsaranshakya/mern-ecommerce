@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Box, Stack, Button, Text, Input } from "@chakra-ui/react";
 import NavBar from './NavBar';
+import { baseUrl } from './App';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -10,7 +11,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:3000/api/v1/auth/login', { email, password },
+      const res = await axios.post(`${baseUrl}/api/v1/auth/login`, { email, password },
       {
           withCredentials: true
         });

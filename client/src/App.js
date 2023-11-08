@@ -8,6 +8,8 @@ import Cart from './Cart';
 import Logout from './Logout';
 import SignUp from './SignUp';
 
+export const baseUrl = "https://mern-ecommerce-uw3n.onrender.com";
+
 function App() {
   return (
     <Router>

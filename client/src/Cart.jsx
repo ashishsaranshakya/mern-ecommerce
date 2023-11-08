@@ -3,6 +3,7 @@ import { Box, VStack, Button, Text, Stack } from "@chakra-ui/react";
 import CartCard from './CartCard';
 import axios from "axios";
 import NavBar from './NavBar';
+import { baseUrl } from './App';
 
 const Cart = () => {
     const [products, setProducts] = useState([]);
@@ -12,10 +13,10 @@ const Cart = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get("http://localhost:3000/api/v1/user/cart", { withCredentials: true });
+                const response = await axios.get(`${baseUrl}/api/v1/user/cart`, { withCredentials: true });
                 const productList = [];
                 for (let i = 0; i < response.data.cart.length; i++) {
-                    const res = await axios.get(`http://localhost:3000/api/v1/product/${response.data.cart[i].productId}`);
+                    const res = await axios.get(`${baseUrl}/api/v1/product/${response.data.cart[i].productId}`);
                     productList.push({ ...res.data.product, quantity: response.data.cart[i].quantity });
                 }
                 setProducts(productList);
@@ -31,7 +32,7 @@ const Cart = () => {
     const checkoutCartHandler = async (amount, product_id) => {
         const key = "rzp_test_aFTRo2L8JTS6Tf";
 
-        const { data: { order } } = await axios.post("http://localhost:3000/api/v1/order/checkout/cart",
+        const { data: { order } } = await axios.post(`${baseUrl}/api/v1/order/checkout/cart`,
             {},
             {
                 withCredentials: true
@@ -45,7 +46,7 @@ const Cart = () => {
             description: "Tutorial of RazorPay",
             image: "https://avatars.githubusercontent.com/u/25058652?v=4",
             order_id: order.id,
-            callback_url: "http://localhost:3000/api/v1/order/verify",
+            callback_url: `${baseUrl}/api/v1/order/verify`,
             prefill: {
                 name: "Gaurav Kumar",
                 email: "gaurav.kumar@example.com",
