@@ -1,6 +1,8 @@
-# Cittaa Internship Backend
+# MERN E-commerce Project
 
-This project is the backend component of an online store management system. It provides a RESTful API built using Node.js, Express.js, and MongoDB, enabling users to authenticate, manage products, create orders, and handle payments. The backend also integrates with the Razorpay payment gateway for secure and efficient payment processing.
+This project is a fullstack online ecommerce website. It provides a RESTful API built using Node.js, Express.js, and MongoDB, enabling users to authenticate, manage products, create orders, and handle payments. And providing a interactive UI that has been built using React.js. The backend also integrates with the Razorpay payment gateway for secure and efficient payment processing.
+
+#### Deployed at: https://mern-ecommerce-uw3n.onrender.com/home
 
 ## Features
 
@@ -18,10 +20,13 @@ This project is the backend component of an online store management system. It p
 ## Getting Started
 To use this API, follow the instructions below:
 
-- Clone the repository: `git clone https://github.com/ashishsaranshakya/cittaa-internship-backend.git`
-- Install the necessary dependencies: `npm install`
-- Start the server: `npm start dev`
-- Access the API at `http://localhost:3001/`
+- Clone the repository: `git clone https://github.com/ashishsaranshakya/mern-ecommerce.git`
+- Install the server dependencies: `npm install`
+- Install client dependencies: `npm run client-install`
+- Change baseUrl in `client/src/App.js` to `http://localhost:3000`
+- Build the frontend: `npm run build`
+- Start the server: `npm run dev`
+- Access the homepage at `http://localhost:3000/home`
 
 ## Configuration
 
