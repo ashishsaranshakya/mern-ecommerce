@@ -7,6 +7,7 @@ import { Types } from 'mongoose';
 import _ from 'lodash';
 import logger, { adminLogger } from '../services/logger.js';
 import { createAPIError } from '../utils/APIError.js';
+import { baseUrl } from '../app.js';
 
 export const checkoutProduct = async (req, res, next) => {
     try{
@@ -195,13 +196,13 @@ export const paymentVerification = async (req, res, next) => {
 
             logger.info(`Payment verified for order ${order._id}`);
             res.redirect(
-                `http://localhost:3000/paymentsuccess?reference=${order._id}`
+                `${baseUrl}/paymentsuccess?reference=${order._id}`
             );
         }
         else {
             logger.error(`Payment verification failed for order ${order._id}`);
             res.redirect(
-                `http://localhost:3000/paymentfailure?reference=${order._id}`
+                `${baseUrl}/paymentfailure?reference=${order._id}`
             );
         }
     }
